@@ -3,6 +3,9 @@
 #define H_PONG_DRIVER
 
 
+sbit BTN1 = P2^2;
+
+
 unsigned char put_char (unsigned char row, unsigned char col, char ch);
 void init_game();
 void init_text();
@@ -22,13 +25,13 @@ void main(void)
 	OSCXCN = 0x67; // turn on external crystal
 	TMOD = 0x20;   // wait 1ms using T1 mode 2
 
-	P2   = 	  0xFF;
-	P1   = 	  0xFF;
 
-
-	//initializing game
+	
+//initializing game
+//-------------------------------------------------------------------------------
 	init_lcd();
-	init_text();
+	init_text(); //waits for start to continue
+	init_game();
 
 
 	while(1) {
@@ -78,9 +81,15 @@ unsigned int i;
 		}
 }
 
-void init_text(void) {
 
-//Display Test to Start Game
+
+
+
+//============================================================================
+//init_text
+//inits the text HELLO PRESS START TO PLAY!
+//============================================================================
+void init_text(void) {
 
 	put_char(1,0, 'H'); put_char(1,6, 'E'); put_char(1,12,'L');	put_char(1,18,'L'); //displays HELLO
 	put_char(1,24,'O'); put_char(1,32,' ');
@@ -91,19 +100,18 @@ void init_text(void) {
 	put_char(1,74,'S'); put_char(1,80,'T'); put_char(1,84,'A'); put_char(1,90,'R');	//displays START TO
 	put_char(1,96,'T'); put_char(1,102,' '); put_char(1,108,'T'); put_char(1,114,'O'); 
 
-				put_char(3,52, 'P');
-				put_char(3,58, 'L');
-				put_char(3,64, 'A');
-				put_char(3,70, 'Y');
-				put_char(3,76,'!');
-				put_char(6,30,' ');
-				put_char(6,36,' ');
-				put_char(6,42,' ');
+	put_char(3,52, 'P'); put_char(3,58, 'L'); put_char(3,64, 'A'); put_char(3,70, 'Y'); //PLAY!
+	put_char(3,76,'!');	put_char(6,30,' ');	put_char(6,36,' '); put_char(6,42,' ');
 
+	refresh_screen();
+	while(BTN1) {
 
-
+	}
+	blank_screen();
 
 }
+
+
 
 
 //============================================================================

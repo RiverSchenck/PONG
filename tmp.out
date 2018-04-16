@@ -4,15 +4,12 @@ COPYRIGHT KEIL ELEKTRONIK GmbH 1987 - 2009
 "C:\SiLabs\Projects\Pong\PONGPONG.obj",
 "C:\SiLabs\Projects\Pong\LCD_driver.obj"  TO "C:\SiLabs\Projects\Pong\PONGPONG" RS(256) PL(68) PW(78)  
 
-*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
-    SEGMENT: ?PR?INIT_GAME?PONGPONG
-
 ******************************************************************************
-* RESTRICTED VERSION WITH 0800H BYTE CODE SIZE LIMIT; USED: 0439H BYTE (52%) *
+* RESTRICTED VERSION WITH 0800H BYTE CODE SIZE LIMIT; USED: 043FH BYTE (53%) *
 ******************************************************************************
 
 >> 
 >> 
 >> 
-Program Size: data=13.0 xdata=1024 code=1114
-LINK/LOCATE RUN COMPLETE.  1 WARNING(S),  0 ERROR(S)
+Program Size: data=13.0 xdata=1024 code=1120
+LINK/LOCATE RUN COMPLETE.  0 WARNING(S),  0 ERROR(S)
