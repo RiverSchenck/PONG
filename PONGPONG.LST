@@ -1,4 +1,4 @@
-C51 COMPILER V9.55   PONGPONG                                                              04/16/2018 11:50:52 PAGE 1   
+C51 COMPILER V9.55   PONGPONG                                                              04/16/2018 12:08:27 PAGE 1   
 
 
 C51 COMPILER V9.55, COMPILATION OF MODULE PONGPONG
@@ -9,78 +9,130 @@ line level    source
 
    1          #include <C8051F020.h>
    2          #include <lcd.h>
-   3          
-   4          //variables
-   5          //=====================================================
-   6          unsigned char pot, pot2;
-   7          //functions
-   8          //=====================================================
-   9          void init_game();
+   3          #define H_PONG_DRIVER
+   4          
+   5          
+   6          unsigned char put_char (unsigned char row, unsigned char col, char ch);
+   7          void init_game();
+   8          void init_text();
+   9          
   10          
-  11          
-  12          void main(void) {
+  11          void main(void)
+  12          {
   13   1      
-  14   1              WDTCN = 0xde;  // disable watchdog
-  15   1          WDTCN = 0xad;
-  16   1          XBR2 = 0x40;   // enable port output
-  17   1          XBR0 = 4;      // enable uart 0
-  18   1              REF0CN = 7;
-  19   1              OSCXCN = 0x67; // turn on external crystal
-  20   1              TMOD = 0x20;   // wait 1ms using T1 mode 2
-  21   1      
-  22   1      
-  23   1      
-  24   1              init_lcd();
-  25   1              init_game();
-  26   1      
-  27   1              for(;;){
-  28   2                      refresh_screen();
-  29   2      
-  30   2      
-  31   2              }
+  14   1      //===========================================================================
+  15   1      //Init
+  16   1      //===========================================================================
+  17   1              WDTCN = 0xde;  // disable watchdog
+  18   1          WDTCN = 0xad;
+  19   1          XBR2 = 0x40;   // enable port output
+  20   1          XBR0 = 4;      // enable uart 0
+  21   1              REF0CN = 7;
+  22   1              OSCXCN = 0x67; // turn on external crystal
+  23   1              TMOD = 0x20;   // wait 1ms using T1 mode 2
+  24   1      
+  25   1              P2   =    0xFF;
+  26   1              P1   =    0xFF;
+  27   1      
+  28   1      
+  29   1              //initializing game
+  30   1              init_lcd();
+  31   1              init_text();
   32   1      
-  33   1      }
-  34          
-  35          
-  36          //============================================================================
-  37          //init_game- inits the game (bounds, net,
-  38          //============================================================================
-  39          void init_game() {
-  40   1      
-  41   1              //------------------
-  42   1              //BOUNDS
-  43   1              //------------------
-  44   1              unsigned int i;
-  45   1                      //TOP BOUNDARY
-  46   1                      for(i=0; i<127; i++) {
-  47   2                              screen[i] = 0x0C; 
-  48   2                      }
-  49   1                      //BOTTOM BOUNDARY
-  50   1                      for(i=0; i<127; i++) {
-  51   2                              screen[896+i] = 0xC0; 
-  52   2                      }
-  53   1                      //NET
-  54   1                      for(i=63; i<960; i++) {
-  55   2                              screen[i+1] = 0xCC;
-C51 COMPILER V9.55   PONGPONG                                                              04/16/2018 11:50:52 PAGE 2   
+  33   1      
+  34   1              while(1) {
+  35   2                      refresh_screen();
+  36   2              }
+  37   1      }
+  38          
+  39                  
+  40          //==============================================================================
+  41          //put_char
+  42          //inserts characters
+  43          //==============================================================================
+  44          unsigned char put_char (unsigned char row, unsigned char col, char ch)
+  45          {
+  46   1              int loc = row * 128 + col;
+  47   1              int font = (ch - ' ') * 5;
+  48   1              char i;
+  49   1              for (i=0; i<5; i++)
+  50   1              {
+  51   2                      screen[loc +i] = font5x8[font+i];
+  52   2              }
+  53   1              return (0);
+  54   1      }
+  55          
+C51 COMPILER V9.55   PONGPONG                                                              04/16/2018 12:08:27 PAGE 2   
 
-  56   2                              screen[i] = 0xCC; 
-  57   2                              i= i+127;
-  58   2                      }
-  59   1      
-  60   1      }
-  61          
-  62          
-  63          
-  64          
+  56          
+  57          
+  58          //============================================================================
+  59          //init_game
+  60          //inits the game (bounds, net,
+  61          //============================================================================
+  62          void init_game ()
+  63          {
+  64   1      unsigned int i;
+  65   1                      //TOP BOUNDARY
+  66   1                      for(i=0; i<127; i++) {
+  67   2                              screen[i] = 0x0C; 
+  68   2                      }
+  69   1                      //BOTTOM BOUNDARY
+  70   1                      for(i=0; i<127; i++) {
+  71   2                              screen[896+i] = 0xC0; 
+  72   2                      }
+  73   1                      //NET
+  74   1                      for(i=63; i<960; i++) {
+  75   2                              screen[i+1] = 0xCC;
+  76   2                              screen[i] = 0xCC; 
+  77   2                              i= i+127;
+  78   2                      }
+  79   1      }
+  80          
+  81          void init_text(void) {
+  82   1      
+  83   1      //Display Test to Start Game
+  84   1      
+  85   1              put_char(1,0, 'H'); put_char(1,6, 'E'); put_char(1,12,'L');     put_char(1,18,'L'); //displays HELLO
+  86   1              put_char(1,24,'O'); put_char(1,32,' ');
+  87   1      
+  88   1              put_char(1,38,'P'); put_char(1,44,'R'); put_char(1,50,'E'); put_char(1,56,'S'); //displays PRESS
+  89   1              put_char(1,62,'S'); put_char(1,68,' '); 
+  90   1              
+  91   1              put_char(1,74,'S'); put_char(1,80,'T'); put_char(1,84,'A'); put_char(1,90,'R'); //displays START TO
+  92   1              put_char(1,96,'T'); put_char(1,102,' '); put_char(1,108,'T'); put_char(1,114,'O'); 
+  93   1      
+  94   1                                      put_char(3,52, 'P');
+  95   1                                      put_char(3,58, 'L');
+  96   1                                      put_char(3,64, 'A');
+  97   1                                      put_char(3,70, 'Y');
+  98   1                                      put_char(3,76,'!');
+  99   1                                      put_char(6,30,' ');
+ 100   1                                      put_char(6,36,' ');
+ 101   1                                      put_char(6,42,' ');
+ 102   1      
+ 103   1      
+ 104   1      
+ 105   1      
+ 106   1      }
+ 107          
+ 108          
+ 109          //============================================================================
+ 110          //move_paddle
+ 111          //moves the paddles
+ 112          //============================================================================
+ 113          
+ 114          
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =    110    ----
+C51 COMPILER V9.55   PONGPONG                                                              04/16/2018 12:08:27 PAGE 3   
+
+   CODE SIZE        =    460    ----
    CONSTANT SIZE    =   ----    ----
    XDATA SIZE       =   ----    ----
    PDATA SIZE       =   ----    ----
-   DATA SIZE        =      2    ----
+   DATA SIZE        =   ----       4
    IDATA SIZE       =   ----    ----
    BIT SIZE         =   ----    ----
 END OF MODULE INFORMATION.

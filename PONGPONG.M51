@@ -1,4 +1,4 @@
-BL51 BANKED LINKER/LOCATER V6.22              04/16/2018  11:50:53  PAGE 1
+BL51 BANKED LINKER/LOCATER V6.22              04/16/2018  12:08:27  PAGE 1
 
 
 BL51 BANKED LINKER/LOCATER V6.22, INVOKED BY:
@@ -14,6 +14,7 @@ INPUT MODULES INCLUDED:
   C:\SiLabs\Projects\Pong\PONGPONG.obj (PONGPONG)
   C:\SiLabs\Projects\Pong\LCD_driver.obj (LCD_DRIVER)
   C:\KEIL\C51\LIB\C51S.LIB (?C_STARTUP)
+  C:\KEIL\C51\LIB\C51S.LIB (?C?IMUL)
 
 
 LINK MAP OF MODULE:  C:\SiLabs\Projects\Pong\PONGPONG (PONGPONG)
@@ -24,8 +25,8 @@ LINK MAP OF MODULE:  C:\SiLabs\Projects\Pong\PONGPONG (PONGPONG)
 
             * * * * * * *   D A T A   M E M O R Y   * * * * * * *
             REG     0000H     0008H     ABSOLUTE     "REG BANK 0"
-            DATA    0008H     0002H     UNIT         ?DT?PONGPONG
-            IDATA   000AH     0001H     UNIT         ?STACK
+            DATA    0008H     0004H     UNIT         _DATA_GROUP_
+            IDATA   000CH     0001H     UNIT         ?STACK
 
             * * * * * * *  X D A T A   M E M O R Y  * * * * * * *
             XDATA   0000H     0400H     ABSOLUTE     
@@ -34,90 +35,147 @@ LINK MAP OF MODULE:  C:\SiLabs\Projects\Pong\PONGPONG (PONGPONG)
             CODE    0000H     0003H     ABSOLUTE     
                     0003H     07FDH                  *** GAP ***
             CODE    0800H     026DH     UNIT         ?PR?LCD
-            CODE    0A6DH     004EH     UNIT         ?PR?INIT_GAME?PONGPONG
-            CODE    0ABBH     0020H     UNIT         ?PR?MAIN?PONGPONG
-            CODE    0ADBH     000CH     UNIT         ?C_C51STARTUP
+            CODE    0A6DH     00F4H     UNIT         ?PR?INIT_TEXT?PONGPONG
+            CODE    0B61H     0064H     UNIT         ?PR?_PUT_CHAR?PONGPONG
+            CODE    0BC5H     004EH     UNIT         ?PR?INIT_GAME?PONGPONG
+            CODE    0C13H     0026H     UNIT         ?PR?MAIN?PONGPONG
+            CODE    0C39H     0012H     UNIT         ?C?LIB_CODE
+            CODE    0C4BH     000CH     UNIT         ?C_C51STARTUP
 
 
 
 OVERLAY MAP OF MODULE:   C:\SiLabs\Projects\Pong\PONGPONG (PONGPONG)
 
 
-SEGMENT
-  +--> CALLED SEGMENT
----------------------
-?C_C51STARTUP
+SEGMENT                          DATA_GROUP 
+  +--> CALLED SEGMENT          START    LENGTH
+----------------------------------------------
+?C_C51STARTUP                  -----    -----
   +--> ?PR?MAIN?PONGPONG
 
-?PR?MAIN?PONGPONG
+?PR?MAIN?PONGPONG              -----    -----
   +--> ?PR?LCD
-  +--> ?PR?INIT_GAME?PONGPONG
+  +--> ?PR?INIT_TEXT?PONGPONG
+
+?PR?INIT_TEXT?PONGPONG         -----    -----
+  +--> ?PR?_PUT_CHAR?PONGPONG
+
+?PR?_PUT_CHAR?PONGPONG         0008H    0004H
+  +--> ?PR?LCD
 
 
 
 SYMBOL TABLE OF MODULE:  C:\SiLabs\Projects\Pong\PONGPONG (PONGPONG)
+
+BL51 BANKED LINKER/LOCATER V6.22            04/16/2018  12:08:27  PAGE 2
+
 
   VALUE           TYPE          NAME
   ----------------------------------
 
   -------         MODULE        PONGPONG
   C:0000H         SYMBOL        _ICE_DUMMY_
+  D:0090H         PUBLIC        P1
   D:00FFH         PUBLIC        WDTCN
-  D:0008H         PUBLIC        pot2
+  D:00A0H         PUBLIC        P2
   D:00E8H         PUBLIC        ADC0CN
   D:00A8H         PUBLIC        IE
   D:00D8H         PUBLIC        PCA0CN
-BL51 BANKED LINKER/LOCATER V6.22            04/16/2018  11:50:53  PAGE 2
-
-
   D:00B8H         PUBLIC        IP
   D:00E1H         PUBLIC        XBR0
   D:00E3H         PUBLIC        XBR2
   D:00D1H         PUBLIC        REF0CN
   D:00C0H         PUBLIC        SMB0CN
-  C:0ABBH         PUBLIC        main
+  C:0C13H         PUBLIC        main
   D:00F8H         PUBLIC        SPI0CN
-  C:0A6DH         PUBLIC        init_game
+  C:0BC5H         PUBLIC        init_game
   D:0089H         PUBLIC        TMOD
   D:0088H         PUBLIC        TCON
   D:00B1H         PUBLIC        OSCXCN
-  D:0009H         PUBLIC        pot
+  C:0B65H         PUBLIC        _put_char
+  C:0A6DH         PUBLIC        init_text
   D:0098H         PUBLIC        SCON0
   D:00C8H         PUBLIC        T2CON
   D:00D0H         PUBLIC        PSW
   -------         PROC          MAIN
-  C:0ABBH         LINE#         12
-  C:0ABBH         LINE#         14
-  C:0ABEH         LINE#         15
-  C:0AC1H         LINE#         16
-  C:0AC4H         LINE#         17
-  C:0AC7H         LINE#         18
-  C:0ACAH         LINE#         19
-  C:0ACDH         LINE#         20
-  C:0AD0H         LINE#         24
-  C:0AD3H         LINE#         25
-  C:0AD6H         LINE#         27
-  C:0AD6H         LINE#         28
-  C:0AD9H         LINE#         31
+  C:0C13H         LINE#         11
+  C:0C13H         LINE#         12
+  C:0C13H         LINE#         17
+  C:0C16H         LINE#         18
+  C:0C19H         LINE#         19
+  C:0C1CH         LINE#         20
+  C:0C1FH         LINE#         21
+  C:0C22H         LINE#         22
+  C:0C25H         LINE#         23
+  C:0C28H         LINE#         25
+  C:0C2BH         LINE#         26
+  C:0C2EH         LINE#         30
+  C:0C31H         LINE#         31
+  C:0C34H         LINE#         34
+  C:0C34H         LINE#         35
+  C:0C37H         LINE#         36
   -------         ENDPROC       MAIN
+  -------         PROC          L?0022
+  -------         ENDPROC       L?0022
+  -------         PROC          _PUT_CHAR
+  D:0007H         SYMBOL        row
+  D:0005H         SYMBOL        col
+  D:0003H         SYMBOL        ch
+  -------         DO            
+  D:0008H         SYMBOL        loc
+  D:000AH         SYMBOL        font
+  D:0007H         SYMBOL        i
+  -------         ENDDO         
+  C:0B65H         LINE#         44
+  C:0B65H         LINE#         45
+  C:0B65H         LINE#         46
+  C:0B75H         LINE#         47
+  C:0B8DH         LINE#         49
+  C:0B8FH         LINE#         50
+  C:0B8FH         LINE#         51
+  C:0BBEH         LINE#         52
+  C:0BC2H         LINE#         53
+BL51 BANKED LINKER/LOCATER V6.22            04/16/2018  12:08:27  PAGE 3
+
+
+  C:0BC4H         LINE#         54
+  -------         ENDPROC       _PUT_CHAR
   -------         PROC          INIT_GAME
   -------         DO            
   D:0006H         SYMBOL        i
   -------         ENDDO         
-  C:0A6DH         LINE#         39
-  C:0A6DH         LINE#         46
-  C:0A6FH         LINE#         47
-  C:0A7AH         LINE#         48
-  C:0A7AH         LINE#         50
-  C:0A7CH         LINE#         51
-  C:0A87H         LINE#         52
-  C:0A87H         LINE#         54
-  C:0A8BH         LINE#         55
-  C:0A98H         LINE#         56
-  C:0AA5H         LINE#         57
-  C:0AACH         LINE#         58
-  C:0ABAH         LINE#         60
+  C:0BC5H         LINE#         62
+  C:0BC5H         LINE#         63
+  C:0BC5H         LINE#         66
+  C:0BC7H         LINE#         67
+  C:0BD2H         LINE#         68
+  C:0BD2H         LINE#         70
+  C:0BD4H         LINE#         71
+  C:0BDFH         LINE#         72
+  C:0BDFH         LINE#         74
+  C:0BE3H         LINE#         75
+  C:0BF0H         LINE#         76
+  C:0BFDH         LINE#         77
+  C:0C04H         LINE#         78
+  C:0C12H         LINE#         79
   -------         ENDPROC       INIT_GAME
+  -------         PROC          INIT_TEXT
+  C:0A6DH         LINE#         81
+  C:0A6DH         LINE#         85
+  C:0A91H         LINE#         86
+  C:0A9FH         LINE#         88
+  C:0AC3H         LINE#         89
+  C:0AD1H         LINE#         91
+  C:0AF5H         LINE#         92
+  C:0B19H         LINE#         94
+  C:0B22H         LINE#         95
+  C:0B2BH         LINE#         96
+  C:0B34H         LINE#         97
+  C:0B3DH         LINE#         98
+  C:0B46H         LINE#         99
+  C:0B4FH         LINE#         100
+  C:0B58H         LINE#         101
+  -------         ENDPROC       INIT_TEXT
   -------         ENDMOD        PONGPONG
 
   -------         MODULE        LCD_DRIVER
@@ -135,9 +193,6 @@ SYMBOL TABLE OF MODULE:  C:\SiLabs\Projects\Pong\PONGPONG (PONGPONG)
   B:00E8H.5       SYMBOL        AD0INT
   B:00E8H.0       SYMBOL        AD0LJST
   B:00E8H.2       SYMBOL        AD0STM0
-BL51 BANKED LINKER/LOCATER V6.22            04/16/2018  11:50:53  PAGE 3
-
-
   B:00E8H.3       SYMBOL        AD0STM1
   B:00E8H.6       SYMBOL        AD0TM
   B:00E8H.1       SYMBOL        AD0WINT
@@ -148,6 +203,9 @@ SYMBOL TABLE OF MODULE:  C:\SiLabs\Projects\Pong\PONGPONG (PONGPONG)
   D:00BFH         SYMBOL        ADC0H
   D:00BEH         SYMBOL        ADC0L
   D:00C7H         SYMBOL        ADC0LTH
+BL51 BANKED LINKER/LOCATER V6.22            04/16/2018  12:08:27  PAGE 4
+
+
   D:00C6H         SYMBOL        ADC0LTL
   D:009CH         SYMBOL        ADC1
   D:00ABH         SYMBOL        ADC1CF
@@ -203,9 +261,6 @@ SYMBOL TABLE OF MODULE:  C:\SiLabs\Projects\Pong\PONGPONG (PONGPONG)
   D:00A8H         SYMBOL        IE
   B:0088H.1       SYMBOL        IE0
   B:0088H.3       SYMBOL        IE1
-BL51 BANKED LINKER/LOCATER V6.22            04/16/2018  11:50:53  PAGE 4
-
-
   D:00B8H         SYMBOL        IP
   B:0088H.0       SYMBOL        IT0
   B:0088H.2       SYMBOL        IT1
@@ -216,6 +271,9 @@ SYMBOL TABLE OF MODULE:  C:\SiLabs\Projects\Pong\PONGPONG (PONGPONG)
   B:00F8H.1       SYMBOL        MSTEN
   D:00B2H         SYMBOL        OSCICN
   D:00B1H         SYMBOL        OSCXCN
+BL51 BANKED LINKER/LOCATER V6.22            04/16/2018  12:08:27  PAGE 5
+
+
   B:00D0H.2       SYMBOL        OV
   B:00D0H.0       SYMBOL        P
   D:0080H         SYMBOL        P0
@@ -271,9 +329,6 @@ SYMBOL TABLE OF MODULE:  C:\SiLabs\Projects\Pong\PONGPONG (PONGPONG)
   D:00D1H         SYMBOL        REF0CN
   B:0098H.4       SYMBOL        REN
   B:0098H.0       SYMBOL        RI
-BL51 BANKED LINKER/LOCATER V6.22            04/16/2018  11:50:53  PAGE 5
-
-
   B:00D0H.3       SYMBOL        RS0
   B:00D0H.4       SYMBOL        RS1
   D:00EFH         SYMBOL        RSTSRC
@@ -284,6 +339,9 @@ SYMBOL TABLE OF MODULE:  C:\SiLabs\Projects\Pong\PONGPONG (PONGPONG)
   D:00AEH         SYMBOL        SADEN1
   D:0099H         SYMBOL        SBUF0
   D:00F2H         SYMBOL        SBUF1
+BL51 BANKED LINKER/LOCATER V6.22            04/16/2018  12:08:27  PAGE 6
+
+
   D:0098H         SYMBOL        SCON0
   D:00F1H         SYMBOL        SCON1
   B:00C0H.3       SYMBOL        SI
@@ -339,9 +397,6 @@ SYMBOL TABLE OF MODULE:  C:\SiLabs\Projects\Pong\PONGPONG (PONGPONG)
   C:0804H         SYMBOL        WCOM1
   C:0800H         SYMBOL        WCOM_A
   C:080DH         SYMBOL        WDAT
-BL51 BANKED LINKER/LOCATER V6.22            04/16/2018  11:50:53  PAGE 6
-
-
   C:0810H         SYMBOL        WDAT1
   C:080CH         SYMBOL        WDAT_A
   C:080BH         SYMBOL        WDAT_C
@@ -352,6 +407,9 @@ SYMBOL TABLE OF MODULE:  C:\SiLabs\Projects\Pong\PONGPONG (PONGPONG)
   C:0800H         LINE#         23
   C:0801H         LINE#         24
   C:0804H         LINE#         25
+BL51 BANKED LINKER/LOCATER V6.22            04/16/2018  12:08:27  PAGE 7
+
+
   C:0805H         LINE#         26
   C:0808H         LINE#         27
   C:0809H         LINE#         28
@@ -407,9 +465,6 @@ SYMBOL TABLE OF MODULE:  C:\SiLabs\Projects\Pong\PONGPONG (PONGPONG)
   C:087AH         LINE#         111
   C:087BH         LINE#         112
   C:087EH         LINE#         113
-BL51 BANKED LINKER/LOCATER V6.22            04/16/2018  11:50:53  PAGE 7
-
-
   C:087FH         LINE#         116
   C:0882H         LINE#         117
   C:0884H         LINE#         119
@@ -419,12 +474,22 @@ SYMBOL TABLE OF MODULE:  C:\SiLabs\Projects\Pong\PONGPONG (PONGPONG)
   C:088CH         LINE#         123
   -------         ENDMOD        LCD_DRIVER
 
+  -------         MODULE        ?C?IMUL
+BL51 BANKED LINKER/LOCATER V6.22            04/16/2018  12:08:27  PAGE 8
+
+
+  C:0C39H         PUBLIC        ?C?IMUL
+  -------         ENDMOD        ?C?IMUL
+
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?INIT_GAME?PONGPONG
+
 ******************************************************************************
 >> 
-* RESTRICTED VERSION WITH 0800H BYTE CODE SIZE LIMIT; USED: 02DBH BYTE (35%) *
+* RESTRICTED VERSION WITH 0800H BYTE CODE SIZE LIMIT; USED: 0439H BYTE (52%) *
 >> 
 ******************************************************************************
 >> 
 
-Program Size: data=11.0 xdata=1024 code=746
-LINK/LOCATE RUN COMPLETE.  0 WARNING(S),  0 ERROR(S)
+Program Size: data=13.0 xdata=1024 code=1114
+LINK/LOCATE RUN COMPLETE.  1 WARNING(S),  0 ERROR(S)
