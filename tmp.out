@@ -5,11 +5,11 @@ COPYRIGHT KEIL ELEKTRONIK GmbH 1987 - 2009
 "C:\SiLabs\Projects\Pong\LCD_driver.obj"  TO "C:\SiLabs\Projects\Pong\PONGPONG" RS(256) PL(68) PW(78) 
 
 ******************************************************************************
-* RESTRICTED VERSION WITH 0800H BYTE CODE SIZE LIMIT; USED: 048EH BYTE (56%) *
+* RESTRICTED VERSION WITH 0800H BYTE CODE SIZE LIMIT; USED: 0503H BYTE (62%) *
 ******************************************************************************
 
 >> 
 >> 
 >> 
-Program Size: data=15.0 xdata=1024 code=1199
+Program Size: data=17.0 xdata=1024 code=1328
 LINK/LOCATE RUN COMPLETE.  0 WARNING(S),  0 ERROR(S)

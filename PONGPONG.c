@@ -3,7 +3,7 @@
 #define H_PONG_DRIVER
 
 
-unsigned char pot, pot2;
+unsigned int pot, pot2;
 sbit BTN1 = P2^2;
 
 
@@ -11,7 +11,7 @@ unsigned char put_char (unsigned char row, unsigned char col, char ch);
 void init_game();
 void init_text();
 void get_pot();
-void move_paddle(unsigned int row);
+void move_paddle(unsigned int paddle1, unsigned int paddle2);
 
 
 void main(void)
@@ -20,23 +20,32 @@ void main(void)
 //===========================================================================
 //Init
 //===========================================================================
-	WDTCN = 0xde;// disable watch dog
-	WDTCN = 0xad;
-	XBR2 = 0x40; // enable port output
-	//XBR0 = 4;
-	OSCXCN = 0x67; // TURN ON EXTERNAL CRYSTAL
-	TMOD = 0x22; // wait 1ms using t1 mode2
-	TH1 = -167; // 2MHZ CLOCK, 167 COUNTS - 1MS
+
+
+	WDTCN = 0xde;  // disable watchdog
+    WDTCN = 0xad;
+    XBR2 = 0x40;   // enable port output
+    XBR0 = 4;      // enable uart 0
+	REF0CN = 7;
+	OSCXCN = 0x67; // turn on external crystal
+	TMOD = 0x20;   // wait 1ms using T1 mode 2
+	TH1 = -167;    // 2MHz clock, 167 counts - 1ms
 	TR1 = 1;
-	while (TF1 == 0) {} //wait 1ms
-	while (!(OSCXCN & 0x80) ) {} //wait till oscillator stable
-	OSCICN = 8; // switch over to 22.1184mhz
-	
-	TH1 = -6;  // 9600 BAUD
-	REF0CN = 0x07; // ref0 voltage
-	ADC0CF = 0xF1; // GAIN
-	ADC0CN = 0x80; //ENALBE AD
-	TMR3CN = 4; // turn on timer 3 for ball speed
+	while ( TF1 == 0 ) { }          // wait 1ms
+	while ( !(OSCXCN & 0x80) ) { }  // wait till oscillator stable
+	OSCICN = 8;    // switch over to 22.1184MHz
+
+
+	T2CON  =  0x08; //Set the timer auto-reload   
+	RCAP2H = -180 ; //22.1184E6/12/1024 = 1800
+	RCAP2L = 3;
+	TR2    =  1;
+	//IE     =  0x80; //0x80; //do not enable timer 2 interrupt
+	EIE2   =  0x02; //enable ADC interrupt
+	ADC0CF =  0x40; //set conversion clock [(22.184Hz/2.5MHz) - 1] = 8
+	ADC0CN =  0x8C; //enable ADC, starts conversion when T2 overfows
+	REF0CN =  0x07; //set reference voltage
+	AMX0SL =  0x01; 
 
 
 
@@ -45,12 +54,11 @@ void main(void)
 //-------------------------------------------------------------------------------
 	init_lcd();
 	init_text(); //waits for start to continue
-	init_game();
 
 
 	while(1) {
 		get_pot();
-		move_paddle(pot);
+		move_paddle(pot, pot2);
 		refresh_screen();
 	}
 }
@@ -142,17 +150,32 @@ void init_text(void) {
 			while (AD0BUSY)
 			{}
 
-			P7 = ADC0H;	//*4 to be 64
-			screen[128] = 0xFF;
+			pot = ADC0H/2;	//*4 to be 64
+
+
+			AMX0SL = 0x00;
+			ADC0CF = 0x41;
+			AD0BUSY = 1;
+			while (AD0BUSY)
+			{}
+
+			pot2 = ADC0H/2;	//*4 to be 64
 			
 	}
 
 
 
 
-	void move_paddle (unsigned int row)
-	{
+	void move_paddle (unsigned int paddle1, unsigned int paddle2)
+	{			
+				blank_screen();
+				init_game();
+				screen[paddle1*128] = 0xFF;
+				screen[(paddle1*128)+1] = 0xFF;
 
-				screen[row*128] = 0xFF;
+				screen[paddle2*127] = 0xFF;
+				screen[(paddle2*127)+1] = 0xFF;
+				
+	
 
 	}
