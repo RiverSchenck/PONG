@@ -1363,7 +1363,6 @@ WindowName=Scratch Pad Viewer
 ResourceID=0
 [WorkState_v1_1.DockState.Bar-37]
 BarID=61905
-Visible=False
 XPos=5
 YPos=-2
 Docking=True
@@ -1812,7 +1811,7 @@ Buttons=ILAIAAAAAAOBBIAAAAAAIKAIAAAAAAFFAIAAAAAADGBIAAAAAAKMAIAAAAAA
 BarID=59398
 XPos=371
 YPos=28
-MRUWidth=22468
+MRUWidth=687
 Docking=True
 MRUDockID=59419
 MRUDockLeftPos=371
@@ -1847,7 +1846,7 @@ Buttons=FJAIAAAAAAHJAIAAAAAACNAIAAAAAAJBAIAAAAAAGNAIAAAAAAMBAIAAAAAAAAAAAAAAAADH
 BarID=59399
 XPos=237
 YPos=28
-MRUWidth=3676
+MRUWidth=5746
 Docking=True
 MRUDockID=59419
 MRUDockLeftPos=237
@@ -2448,8 +2447,26 @@ ptn_Child1=MainFrame
 ptn_Child2=ChildFrames
 [WorkState_v1_1.Frames.MainFrame]
 WindowPlacement=MCAAAAAACAAAAAAADAAAAAAAAADIPPPPAADIPPPPPPPPPPPPPPPPPPPPAAAAAAAAAAAAAAAAELCAAAAAMLBAAAAA
-Title=Silicon Laboratories IDE
+Title=Silicon Laboratories IDE - [LCD_driver.asm]
 [WorkState_v1_1.Frames.ChildFrames]
+ptn_Child1=Document-0
+ptn_Child2=Document-1
+[WorkState_v1_1.Frames.ChildFrames.Document-0]
+ptn_Child1=ViewFrame-0
+[WorkState_v1_1.Frames.ChildFrames.Document-0.ViewFrame-0]
+DocPathName=PONGPONG.c
+DocumentString=Source File
+DocTemplateIndex=0
+WindowPlacement=MCAAAAAAAAAAAAAABAAAAAAAPPPPPPPPPPPPPPPPIPPPPPPPBOPPPPPPAAAAAAAAAAAAAAAAKMDAAAAACJBAAAAA
+IsActiveChildFrame=False
+[WorkState_v1_1.Frames.ChildFrames.Document-1]
+ptn_Child1=ViewFrame-0
+[WorkState_v1_1.Frames.ChildFrames.Document-1.ViewFrame-0]
+DocPathName=LCD_driver.asm
+DocumentString=Source File
+DocTemplateIndex=0
+WindowPlacement=MCAAAAAACAAAAAAADAAAAAAAPPPPPPPPPPPPPPPPIPPPPPPPBOPPPPPPEDAAAAAAEDAAAAAACODAAAAAKMBAAAAA
+IsActiveChildFrame=True
 [WorkState_v1_1.ProjectTarget]
 ProjectTarget=C8051F020
 [WorkState_v1_1.hardwareId]
@@ -2475,13 +2492,13 @@ Assembler=C:\Keil\C51\BIN\A51.EXE
 [WorkState_v1_1.AssFlag]
 AssFlag=XR GEN DB EP NOMOD51 INCDIR(C:\SiLabs\MCU\Inc)
 [WorkState_v1_1.AssFormat]
-AssFormat=<Executable Name> <Input File(s)> <Flags> 
+AssFormat=<Executable Name> <Input File(s)> <Flags>  
 [WorkState_v1_1.Compiler]
 Compiler=C:\Keil\C51\BIN\c51.exe
 [WorkState_v1_1.CompFlag]
 CompFlag=DB OE BR INCDIR(C:\SiLabs\MCU\Inc)
 [WorkState_v1_1.CompFormat]
-CompFormat=<Executable Name> <Input File(s)> <Flags> 
+CompFormat=<Executable Name> <Input File(s)> <Flags>  
 [WorkState_v1_1.RunOptimizer]
 RunOptimizer=0
 [WorkState_v1_1.Linker]
@@ -2489,11 +2506,11 @@ Linker=C:\Keil\C51\BIN\BL51.EXE
 [WorkState_v1_1.LinkFlag]
 LinkFlag=RS(256) PL(68) PW(78)
 [WorkState_v1_1.LinkFormat]
-LinkFormat=<Executable Name> <Input File(s)> TO <Output File> <Flags> 
+LinkFormat=<Executable Name> <Input File(s)> TO <Output File> <Flags>  
 [WorkState_v1_1.PreprocFlag]
 PreprocFlag=
 [WorkState_v1_1.PreprocFormat]
-PreprocFormat=
+PreprocFormat= 
 [WorkState_v1_1.DisList]
 DisList=1
 [WorkState_v1_1.DisOP]
@@ -2518,7 +2535,7 @@ BitsBeforeTargetIR=0
 [WorkState_v1_1.BankingPN]
 BankingPN=32767
 [WorkState_v1_1.OutputFile]
-OutputFile=
+OutputFile=PONGPONG
 [WorkState_v1_1.MakeFile]
 MakeFile=
 [WorkState_v1_1.HexGenerator]
@@ -2541,8 +2558,20 @@ AdapterSN=EC300439594
 USB Adapter Power=0
 [WorkState_v1_1.PFiles]
 [WorkState_v1_1.AFiles]
+ptn_Child1=FileName
+[WorkState_v1_1.AFiles.FileName]
+FileName=LCD_driver.asm
 [WorkState_v1_1.CFiles]
+ptn_Child1=FileName
+[WorkState_v1_1.CFiles.FileName]
+FileName=PONGPONG.c
 [WorkState_v1_1.LFiles]
+ptn_Child1=FileName
+[WorkState_v1_1.LFiles.FileName]
+FileName=PONGPONG.obj
+ptn_Child1=FileName
+[WorkState_v1_1.LFiles.FileName.FileName]
+FileName=LCD_driver.obj
 [WorkState_v1_1.BankMap]
 [WorkState_v1_1.Folders]
 ptn_Child1=FolderName
@@ -2553,8 +2582,14 @@ ptn_Child1=FolderName
 FolderName=Header Files
 [WorkState_v1_1.Source Files]
 ptn_Child1=FolderFlags
+ptn_Child2=FileName
 [WorkState_v1_1.Source Files.FolderFlags]
-FolderFlags=1
+FolderFlags=0
+[WorkState_v1_1.Source Files.FileName]
+FileName=LCD_driver.asm
+ptn_Child1=FileName
+[WorkState_v1_1.Source Files.FileName.FileName]
+FileName=PONGPONG.c
 [WorkState_v1_1.Header Files]
 ptn_Child1=FolderFlags
 ptn_Child2=FileName
@@ -2565,3 +2600,6 @@ FileName=C8051F020_defs.h
 ptn_Child1=FileName
 [WorkState_v1_1.Header Files.FileName.FileName]
 FileName=compiler_defs.h
+ptn_Child1=FileName
+[WorkState_v1_1.Header Files.FileName.FileName.FileName]
+FileName=LCD.h

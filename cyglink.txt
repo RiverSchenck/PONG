@@ -1,2 +1,2 @@
 "C:\SiLabs\Projects\Pong\PONGPONG.obj",
-"C:\SiLabs\Projects\Pong\LCD_driver.obj"  TO "C:\SiLabs\Projects\Pong\PONGPONG" RS(256) PL(68) PW(78)  
+"C:\SiLabs\Projects\Pong\LCD_driver.obj"  TO "C:\SiLabs\Projects\Pong\PONGPONG" RS(256) PL(68) PW(78) 

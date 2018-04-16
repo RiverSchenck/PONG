@@ -1,4 +1,4 @@
-C51 COMPILER V9.55   PONGPONG                                                              04/16/2018 12:27:17 PAGE 1   
+C51 COMPILER V9.55   PONGPONG                                                              04/16/2018 13:43:01 PAGE 1   
 
 
 C51 COMPILER V9.55, COMPILATION OF MODULE PONGPONG
@@ -12,131 +12,171 @@ line level    source
    3          #define H_PONG_DRIVER
    4          
    5          
-   6          sbit BTN1 = P2^2;
-   7          
+   6          unsigned char pot, pot2;
+   7          sbit BTN1 = P2^2;
    8          
-   9          unsigned char put_char (unsigned char row, unsigned char col, char ch);
-  10          void init_game();
-  11          void init_text();
-  12          
-  13          
-  14          void main(void)
-  15          {
-  16   1      
-  17   1      //===========================================================================
-  18   1      //Init
-  19   1      //===========================================================================
-  20   1              WDTCN = 0xde;  // disable watchdog
-  21   1          WDTCN = 0xad;
-  22   1          XBR2 = 0x40;   // enable port output
-  23   1          XBR0 = 4;      // enable uart 0
-  24   1              REF0CN = 7;
-  25   1              OSCXCN = 0x67; // turn on external crystal
-  26   1              TMOD = 0x20;   // wait 1ms using T1 mode 2
-  27   1      
-  28   1      
-  29   1              
-  30   1      //initializing game
-  31   1      //-------------------------------------------------------------------------------
-  32   1              init_lcd();
-  33   1              init_text(); //waits for start to continue
-  34   1              init_game();
-  35   1      
-  36   1      
-  37   1              while(1) {
-  38   2                      refresh_screen();
-  39   2              }
-  40   1      }
-  41          
-  42                  
-  43          //==============================================================================
-  44          //put_char
-  45          //inserts characters
-  46          //==============================================================================
-  47          unsigned char put_char (unsigned char row, unsigned char col, char ch)
-  48          {
-  49   1              int loc = row * 128 + col;
-  50   1              int font = (ch - ' ') * 5;
-  51   1              char i;
-  52   1              for (i=0; i<5; i++)
-  53   1              {
-  54   2                      screen[loc +i] = font5x8[font+i];
+   9          
+  10          unsigned char put_char (unsigned char row, unsigned char col, char ch);
+  11          void init_game();
+  12          void init_text();
+  13          void get_pot();
+  14          void move_paddle(unsigned int row);
+  15          
+  16          
+  17          void main(void)
+  18          {
+  19   1      
+  20   1      //===========================================================================
+  21   1      //Init
+  22   1      //===========================================================================
+  23   1              WDTCN = 0xde;// disable watch dog
+  24   1              WDTCN = 0xad;
+  25   1              XBR2 = 0x40; // enable port output
+  26   1              //XBR0 = 4;
+  27   1              OSCXCN = 0x67; // TURN ON EXTERNAL CRYSTAL
+  28   1              TMOD = 0x22; // wait 1ms using t1 mode2
+  29   1              TH1 = -167; // 2MHZ CLOCK, 167 COUNTS - 1MS
+  30   1              TR1 = 1;
+  31   1              while (TF1 == 0) {} //wait 1ms
+  32   1              while (!(OSCXCN & 0x80) ) {} //wait till oscillator stable
+  33   1              OSCICN = 8; // switch over to 22.1184mhz
+  34   1              
+  35   1              TH1 = -6;  // 9600 BAUD
+  36   1              REF0CN = 0x07; // ref0 voltage
+  37   1              ADC0CF = 0xF1; // GAIN
+  38   1              ADC0CN = 0x80; //ENALBE AD
+  39   1              TMR3CN = 4; // turn on timer 3 for ball speed
+  40   1      
+  41   1      
+  42   1      
+  43   1              
+  44   1      //initializing game
+  45   1      //-------------------------------------------------------------------------------
+  46   1              init_lcd();
+  47   1              init_text(); //waits for start to continue
+  48   1              init_game();
+  49   1      
+  50   1      
+  51   1              while(1) {
+  52   2                      get_pot();
+  53   2                      move_paddle(pot);
+  54   2                      refresh_screen();
   55   2              }
-C51 COMPILER V9.55   PONGPONG                                                              04/16/2018 12:27:17 PAGE 2   
+C51 COMPILER V9.55   PONGPONG                                                              04/16/2018 13:43:01 PAGE 2   
 
-  56   1              return (0);
-  57   1      }
-  58          
-  59          
-  60          
-  61          //============================================================================
-  62          //init_game
-  63          //inits the game (bounds, net,
-  64          //============================================================================
-  65          void init_game ()
-  66          {
-  67   1      unsigned int i;
-  68   1                      //TOP BOUNDARY
-  69   1                      for(i=0; i<127; i++) {
-  70   2                              screen[i] = 0x0C; 
-  71   2                      }
-  72   1                      //BOTTOM BOUNDARY
-  73   1                      for(i=0; i<127; i++) {
-  74   2                              screen[896+i] = 0xC0; 
-  75   2                      }
-  76   1                      //NET
-  77   1                      for(i=63; i<960; i++) {
-  78   2                              screen[i+1] = 0xCC;
-  79   2                              screen[i] = 0xCC; 
-  80   2                              i= i+127;
-  81   2                      }
-  82   1      }
-  83          
-  84          //============================================================================
-  85          //init_text
-  86          //inits the text HELLO PRESS START TO PLAY!
-  87          //============================================================================
-  88          void init_text(void) {
-  89   1      
-  90   1      //Display Test to Start Game
-  91   1      
-  92   1              put_char(1,0, 'H'); put_char(1,6, 'E'); put_char(1,12,'L');     put_char(1,18,'L'); //displays HELLO
-  93   1              put_char(1,24,'O'); put_char(1,32,' ');
-  94   1      
-  95   1              put_char(1,38,'P'); put_char(1,44,'R'); put_char(1,50,'E'); put_char(1,56,'S'); //displays PRESS
-  96   1              put_char(1,62,'S'); put_char(1,68,' '); 
-  97   1              
-  98   1              put_char(1,74,'S'); put_char(1,80,'T'); put_char(1,84,'A'); put_char(1,90,'R'); //displays START TO
-  99   1              put_char(1,96,'T'); put_char(1,102,' '); put_char(1,108,'T'); put_char(1,114,'O'); 
- 100   1      
- 101   1              put_char(3,52, 'P'); put_char(3,58, 'L'); put_char(3,64, 'A'); put_char(3,70, 'Y'); //PLAY!
- 102   1              put_char(3,76,'!');     put_char(6,30,' ');     put_char(6,36,' '); put_char(6,42,' ');
- 103   1      
- 104   1              refresh_screen();
- 105   1              while(BTN1) {
- 106   2      
- 107   2              }
- 108   1              blank_screen();
+  56   1      }
+  57          
+  58                  
+  59          //==============================================================================
+  60          //put_char
+  61          //inserts characters
+  62          //==============================================================================
+  63                  unsigned char put_char (unsigned char row, unsigned char col, char ch)
+  64                  {
+  65   1                              int loc = row * 128 + col;
+  66   1                              int font = (ch - ' ') * 5;
+  67   1                              char i;
+  68   1                              for (i=0; i<5; i++)
+  69   1                              {
+  70   2                                      screen[loc +i] = font5x8[font+i];
+  71   2                              }
+  72   1                              return (0);
+  73   1              }
+  74          
+  75          
+  76          
+  77          //============================================================================
+  78          //init_game
+  79          //inits the game (bounds, net,
+  80          //============================================================================
+  81                  void init_game ()
+  82                  {
+  83   1                      unsigned int i;
+  84   1                                      //TOP BOUNDARY
+  85   1                                      for(i=0; i<127; i++) {
+  86   2                                              screen[i] = 0x0C; 
+  87   2                                      }
+  88   1                                      //BOTTOM BOUNDARY
+  89   1                                      for(i=0; i<127; i++) {
+  90   2                                              screen[896+i] = 0xC0; 
+  91   2                                      }
+  92   1                                      //NET
+  93   1                                      for(i=63; i<960; i++) {
+  94   2                                              screen[i+1] = 0xCC;
+  95   2                                              screen[i] = 0xCC; 
+  96   2                                              i= i+127;
+  97   2                                      }
+  98   1              }
+  99          
+ 100          
+ 101          
+ 102          
+ 103          
+ 104          //============================================================================
+ 105          //init_text
+ 106          //inits the text HELLO PRESS START TO PLAY!
+ 107          //============================================================================
+ 108          void init_text(void) {
  109   1      
- 110   1      }
- 111          
- 112          
- 113          //============================================================================
- 114          //move_paddle
- 115          //moves the paddles
- 116          //============================================================================
- 117          
-C51 COMPILER V9.55   PONGPONG                                                              04/16/2018 12:27:17 PAGE 3   
+ 110   1                      put_char(1,0, 'H'); put_char(1,6, 'E'); put_char(1,12,'L');     put_char(1,18,'L'); //displays HELLO
+ 111   1                      put_char(1,24,'O'); put_char(1,32,' ');
+ 112   1      
+ 113   1                      put_char(1,38,'P'); put_char(1,44,'R'); put_char(1,50,'E'); put_char(1,56,'S'); //displays PRESS
+ 114   1                      put_char(1,62,'S'); put_char(1,68,' '); 
+ 115   1              
+ 116   1                      put_char(1,74,'S'); put_char(1,80,'T'); put_char(1,84,'A'); put_char(1,90,'R'); //displays START TO
+ 117   1                      put_char(1,96,'T'); put_char(1,102,' '); put_char(1,108,'T'); put_char(1,114,'O'); 
+C51 COMPILER V9.55   PONGPONG                                                              04/16/2018 13:43:01 PAGE 3   
 
- 118          
+ 118   1      
+ 119   1                      put_char(3,52, 'P'); put_char(3,58, 'L'); put_char(3,64, 'A'); put_char(3,70, 'Y'); //PLAY!
+ 120   1                      put_char(3,76,'!');     put_char(6,30,' ');     put_char(6,36,' '); put_char(6,42,' ');
+ 121   1      
+ 122   1                      refresh_screen();
+ 123   1                      while(BTN1) {
+ 124   2      
+ 125   2                      }
+ 126   1                      blank_screen();
+ 127   1      
+ 128   1      }
+ 129          
+ 130          
+ 131          
+ 132          
+ 133          //============================================================================
+ 134          //move_paddle
+ 135          //moves the paddles
+ 136          //============================================================================
+ 137                  void get_pot() {
+ 138   1      
+ 139   1                              AMX0SL = 0x00;
+ 140   1                              ADC0CF = 0x41;
+ 141   1                              AD0BUSY = 1;
+ 142   1                              while (AD0BUSY)
+ 143   1                              {}
+ 144   1      
+ 145   1                              P7 = ADC0H;     //*4 to be 64
+ 146   1                              screen[128] = 0xFF;
+ 147   1                              
+ 148   1              }
+ 149          
+ 150          
+ 151          
+ 152          
+ 153                  void move_paddle (unsigned int row)
+ 154                  {
+ 155   1      
+ 156   1                                      screen[row*128] = 0xFF;
+ 157   1      
+ 158   1              }
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =    466    ----
+   CODE SIZE        =    545    ----
    CONSTANT SIZE    =   ----    ----
    XDATA SIZE       =   ----    ----
    PDATA SIZE       =   ----    ----
-   DATA SIZE        =   ----       4
+   DATA SIZE        =      2       4
    IDATA SIZE       =   ----    ----
    BIT SIZE         =   ----    ----
 END OF MODULE INFORMATION.

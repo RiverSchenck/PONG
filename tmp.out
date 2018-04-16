@@ -2,14 +2,14 @@
 BL51 BANKED LINKER/LOCATER V6.22 - SN: Eval Version
 COPYRIGHT KEIL ELEKTRONIK GmbH 1987 - 2009
 "C:\SiLabs\Projects\Pong\PONGPONG.obj",
-"C:\SiLabs\Projects\Pong\LCD_driver.obj"  TO "C:\SiLabs\Projects\Pong\PONGPONG" RS(256) PL(68) PW(78)  
+"C:\SiLabs\Projects\Pong\LCD_driver.obj"  TO "C:\SiLabs\Projects\Pong\PONGPONG" RS(256) PL(68) PW(78) 
 
 ******************************************************************************
-* RESTRICTED VERSION WITH 0800H BYTE CODE SIZE LIMIT; USED: 043FH BYTE (53%) *
+* RESTRICTED VERSION WITH 0800H BYTE CODE SIZE LIMIT; USED: 048EH BYTE (56%) *
 ******************************************************************************
 
 >> 
 >> 
 >> 
-Program Size: data=13.0 xdata=1024 code=1120
+Program Size: data=15.0 xdata=1024 code=1199
 LINK/LOCATE RUN COMPLETE.  0 WARNING(S),  0 ERROR(S)
