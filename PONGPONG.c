@@ -5,13 +5,14 @@
 
 unsigned int pot, pot2;
 sbit BTN1 = P2^2;
-
+unsigned char paddle_top, paddle_height, paddle_bottom;
 
 unsigned char put_char (unsigned char row, unsigned char col, char ch);
 void init_game();
 void init_text();
-void get_pot();
-void move_paddle(unsigned int paddle1, unsigned int paddle2);
+void move_paddle();
+void draw_paddle (int x, int y, char pad_type);
+
 
 
 void main(void)
@@ -44,26 +45,83 @@ void main(void)
 	EIE2   =  0x02; //enable ADC interrupt
 	ADC0CF =  0x40; //set conversion clock [(22.184Hz/2.5MHz) - 1] = 8
 	ADC0CN =  0x8C; //enable ADC, starts conversion when T2 overfows
-	REF0CN =  0x07; //set reference voltage
-	AMX0SL =  0x01; 
+	REF0CN =  0x07; //set reference voltage 
 
 
 
-	
+//----------------------	
 //initializing game
-//-------------------------------------------------------------------------------
-	init_lcd();
-	init_text(); //waits for start to continue
+//----------------------
+	init_lcd();//init screen
+	init_text(); //displays text and waits for button press to start
 
-
+//----------------------	
+//Playing game
+//----------------------
 	while(1) {
-		get_pot();
-		move_paddle(pot, pot2);
+		move_paddle();
 		refresh_screen();
+
+		draw_paddle(0, pot, 11);
 	}
 }
 
 	
+
+
+void draw_paddle (int x, int y, char pad_type) {
+	long mask;
+	//unsigned char paddle_top, paddle_height, paddle_bottom;
+		switch(pad_type)
+		{
+			case 0:
+				if(y>54) y = 54;
+				mask = 0xffl;  //assign as long
+				paddle_height = 8;
+				break;
+			case 1:
+				if(y>50) y = 50;
+				mask = 0xfffl;
+				paddle_height = 12;
+				break;
+			case 2:
+				if(y > 46) y = 46;
+				mask = 0xffffl; //length of paddles
+				paddle_height = 16;
+				break;
+			case 3:
+				while(x<1024)
+					{
+				    	screen[x] = 0xffl;
+					    screen[x+1] = 0xffl;
+						x = x+128;
+						paddle_top = 2;
+						paddle_bottom = 61;
+						paddle_height = 60;
+					}
+				
+				return;
+		}
+	if (y<2) y =2;
+	mask = mask <<(y%8);
+	x+= (y/8)*128;
+	screen[x] |= mask;
+	screen[x+1] |= mask;
+	screen[x+128] |= mask >> 8;
+	screen[x+129] |= mask >> 8;
+	screen[x+256] |= mask >> 16;
+	screen[x+257] |= mask >> 16;
+	paddle_top = y;  // store
+	paddle_bottom = y+paddle_height-1; //
+
+
+}
+
+
+
+
+
+
 //==============================================================================
 //put_char
 //inserts characters
@@ -82,9 +140,11 @@ void main(void)
 
 
 
+
+
 //============================================================================
 //init_game
-//inits the game (bounds, net,
+//inits the game (bounds and net)
 //============================================================================
 	void init_game ()
 	{
@@ -111,7 +171,7 @@ void main(void)
 
 //============================================================================
 //init_text
-//inits the text HELLO PRESS START TO PLAY!
+//inits the text HELLO PRESS START TO PLAY! Waits for button prexs to start
 //============================================================================
 void init_text(void) {
 
@@ -142,40 +202,27 @@ void init_text(void) {
 //move_paddle
 //moves the paddles
 //============================================================================
-	void get_pot() {
+void move_paddle() {
+	blank_screen();
+	init_game();
 
-			AMX0SL = 0x00;
-			ADC0CF = 0x41;
-			AD0BUSY = 1;
-			while (AD0BUSY)
-			{}
+	AMX0SL = 0x00;  //AIN0
+	ADC0CF = 0x40;
+	AD0INT = 0; // clear flag
+	AD0BUSY = 1;
+	while(AD0INT == 0)
+	{}
+	pot = ADC0H*4;
 
-			pot = ADC0H/2;	//*4 to be 64
 
-
-			AMX0SL = 0x00;
-			ADC0CF = 0x41;
-			AD0BUSY = 1;
-			while (AD0BUSY)
-			{}
-
-			pot2 = ADC0H/2;	//*4 to be 64
+	AMX0SL = 0x01; //AIN2
+	ADC0CF = 0x40;
+	AD0INT = 0; //clear flag
+	AD0BUSY = 1;
+	while(AD0INT == 0)
+	{}
+	pot2 = ADC0H*4;
 			
-	}
+}
 
 
-
-
-	void move_paddle (unsigned int paddle1, unsigned int paddle2)
-	{			
-				blank_screen();
-				init_game();
-				screen[paddle1*128] = 0xFF;
-				screen[(paddle1*128)+1] = 0xFF;
-
-				screen[paddle2*127] = 0xFF;
-				screen[(paddle2*127)+1] = 0xFF;
-				
-	
-
-	}
