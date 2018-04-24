@@ -1,4 +1,4 @@
-A51 MACRO ASSEMBLER  LCD_DRIVER                                                           04/22/2018 13:18:18 PAGE     1
+A51 MACRO ASSEMBLER  LCD_DRIVER                                                           04/24/2018 14:02:11 PAGE     1
 
 
 MACRO ASSEMBLER A51 V8.02c
@@ -7,7 +7,7 @@ ASSEMBLER INVOKED BY: C:\Keil\C51\BIN\A51.EXE LCD_driver.asm XR GEN DB EP NOMOD5
 
 LOC  OBJ            LINE     SOURCE
 
-                       1     public init_lcd, refresh_screen, blank_screen, screen, font5x8;
+                       1     public init_lcd, refresh_screen, blank_screen, screen, font5x8, score5x8;
                        2     
                        3     ?PR?lcd segment code
 ----                   4             rseg ?PR?lcd
@@ -65,7 +65,7 @@ LOC  OBJ            LINE     SOURCE
   00A5          +1    56     P1MDOUT  DATA  0A5H   ; PORT 1 OUTPUT MODE CONFIGURATION
   00A6          +1    57     P2MDOUT  DATA  0A6H   ; PORT 2 OUTPUT MODE CONFIGURATION
   00A7          +1    58     P3MDOUT  DATA  0A7H   ; PORT 3 OUTPUT MODE CONFIGURATION
-A51 MACRO ASSEMBLER  LCD_DRIVER                                                           04/22/2018 13:18:18 PAGE     2
+A51 MACRO ASSEMBLER  LCD_DRIVER                                                           04/24/2018 14:02:11 PAGE     2
 
   00A8          +1    59     IE       DATA  0A8H   ; INTERRUPT ENABLE
   00A9          +1    60     SADDR0   DATA  0A9H   ; SERIAL PORT 0 SLAVE ADDRESS
@@ -133,7 +133,7 @@ LOC  OBJ            LINE     SOURCE
   00EB          +1   122     PCA0CPL1 DATA  0EBH   ; CAPTURE/COMPARE REGISTER FOR PCA 0 MODULE 1 - LOW BYTE
   00EC          +1   123     PCA0CPL2 DATA  0ECH   ; CAPTURE/COMPARE REGISTER FOR PCA 0 MODULE 2 - LOW BYTE
   00ED          +1   124     PCA0CPL3 DATA  0EDH   ; CAPTURE/COMPARE REGISTER FOR PCA 0 MODULE 3 - LOW BYTE
-A51 MACRO ASSEMBLER  LCD_DRIVER                                                           04/22/2018 13:18:18 PAGE     3
+A51 MACRO ASSEMBLER  LCD_DRIVER                                                           04/24/2018 14:02:11 PAGE     3
 
   00EE          +1   125     PCA0CPL4 DATA  0EEH   ; CAPTURE/COMPARE REGISTER FOR PCA 0 MODULE 4 - LOW BYTE
   00EF          +1   126     RSTSRC   DATA  0EFH   ; RESET SOURCE 
@@ -201,7 +201,7 @@ LOC  OBJ            LINE     SOURCE
   00C3          +1   188     SI       BIT   SMB0CN.3 ; SMBUS 0 INTERRUPT PENDING FLAG
   00C4          +1   189     STO      BIT   SMB0CN.4 ; SMBUS 0 STOP FLAG
   00C5          +1   190     STA      BIT   SMB0CN.5 ; SMBUS 0 START FLAG
-A51 MACRO ASSEMBLER  LCD_DRIVER                                                           04/22/2018 13:18:18 PAGE     4
+A51 MACRO ASSEMBLER  LCD_DRIVER                                                           04/24/2018 14:02:11 PAGE     4
 
   00C6          +1   191     ENSMB    BIT   SMB0CN.6 ; SMBUS 0 ENABLE 
                 +1   192     ;
@@ -269,7 +269,7 @@ LOC  OBJ            LINE     SOURCE
                      254     ; outputs: none
                      255     ; destroys:
                      256     ;   wcom:   EMI0CN
-A51 MACRO ASSEMBLER  LCD_DRIVER                                                           04/22/2018 13:18:18 PAGE     5
+A51 MACRO ASSEMBLER  LCD_DRIVER                                                           04/24/2018 14:02:11 PAGE     5
 
                      257     ;   wcom_a: EMI0CN, r0
 0000 F8              258     wcom_a: mov     r0,a            ; save acc in R0 while we check BUSY
@@ -337,7 +337,7 @@ LOC  OBJ            LINE     SOURCE
 0058 120000   F      320             call    wcom
 005B 120000   F      321             call    blank_screen    ; fall through to refresh_screen
                      322     ;
-A51 MACRO ASSEMBLER  LCD_DRIVER                                                           04/22/2018 13:18:18 PAGE     6
+A51 MACRO ASSEMBLER  LCD_DRIVER                                                           04/24/2018 14:02:11 PAGE     6
 
                      323     ; subroutine refresh_screen
                      324     ;   Copies 1k bytes of data from external address 0 to the LCD. Bytes 0-7F go
@@ -376,211 +376,239 @@ LOC  OBJ            LINE     SOURCE
 0089 30F2F8          357             jnb     b.2,blank_loop
 008C 22              358             ret
                      359     
-008D                 360     font5x8:
-008D 00000000        361       db  000H, 000H, 000H, 000H, 000H ;  
-0091 00                      
-0092 00065F06        362       db  000H, 006H, 05FH, 006H, 000H ; !
+                     360     
+008D                 361     score5x8:
+008D 3E514945        362             db  03EH, 051H, 049H, 045H, 03EH ; 0
+0091 3E                      
+0092 00427F40        363       db  000H, 042H, 07FH, 040H, 000H ; 1
 0096 00                      
-0097 07030007        363       db  007H, 003H, 000H, 007H, 003H ; "
-009B 03                      
-009C 247E247E        364       db  024H, 07EH, 024H, 07EH, 024H ; #
-00A0 24                      
-00A1 242B6A12        365       db  024H, 02BH, 06AH, 012H, 000H ; $
-00A5 00                      
-00A6 63130864        366       db  063H, 013H, 008H, 064H, 063H ; %
-00AA 63                      
-00AB 36495620        367       db  036H, 049H, 056H, 020H, 050H ; &
-00AF 50                      
-00B0 00070300        368       db  000H, 007H, 003H, 000H, 000H ; '
-00B4 00                      
-00B5 003E4100        369       db  000H, 03EH, 041H, 000H, 000H ; (
-00B9 00                      
-00BA 00413E00        370       db  000H, 041H, 03EH, 000H, 000H ; )
-00BE 00                      
-00BF 083E1C3E        371       db  008H, 03EH, 01CH, 03EH, 008H ; *
-00C3 08                      
-00C4 08083E08        372       db  008H, 008H, 03EH, 008H, 008H ; +
-00C8 08                      
-00C9 00E06000        373       db  000H, 0E0H, 060H, 000H, 000H ; ,
-00CD 00                      
-00CE 08080808        374       db  008H, 008H, 008H, 008H, 008H ; -
-00D2 08                      
-A51 MACRO ASSEMBLER  LCD_DRIVER                                                           04/22/2018 13:18:18 PAGE     7
+0097 62514949        364       db  062H, 051H, 049H, 049H, 046H ; 2
+009B 46                      
+009C 22494949        365       db  022H, 049H, 049H, 049H, 036H ; 3
+00A0 36                      
+00A1 1814127F        366       db  018H, 014H, 012H, 07FH, 010H ; 4
+00A5 10                      
+00A6 2F494949        367       db  02FH, 049H, 049H, 049H, 031H ; 5
+00AA 31                      
+00AB 3C4A4949        368       db  03CH, 04AH, 049H, 049H, 030H ; 6
+00AF 30                      
+00B0 01710905        369       db  001H, 071H, 009H, 005H, 003H ; 7
+00B4 03                      
+00B5 36494949        370       db  036H, 049H, 049H, 049H, 036H ; 8
+00B9 36                      
+00BA 06494929        371       db  006H, 049H, 049H, 029H, 01EH ; 9
+00BE 1E                      
+                     372     
+                     373     
+                     374     
+                     375     
+                     376     
+00BF                 377     font5x8:
+00BF 00000000        378       db  000H, 000H, 000H, 000H, 000H ;  
+A51 MACRO ASSEMBLER  LCD_DRIVER                                                           04/24/2018 14:02:11 PAGE     7
 
-00D3 00606000        375       db  000H, 060H, 060H, 000H, 000H ; .
+00C3 00                      
+00C4 00065F06        379       db  000H, 006H, 05FH, 006H, 000H ; !
+00C8 00                      
+00C9 07030007        380       db  007H, 003H, 000H, 007H, 003H ; "
+00CD 03                      
+00CE 247E247E        381       db  024H, 07EH, 024H, 07EH, 024H ; #
+00D2 24                      
+00D3 242B6A12        382       db  024H, 02BH, 06AH, 012H, 000H ; $
 00D7 00                      
-00D8 20100804        376       db  020H, 010H, 008H, 004H, 002H ; /
-00DC 02                      
-00DD 3E514945        377       db  03EH, 051H, 049H, 045H, 03EH ; 0
-00E1 3E                      
-00E2 00427F40        378       db  000H, 042H, 07FH, 040H, 000H ; 1
+00D8 63130864        383       db  063H, 013H, 008H, 064H, 063H ; %
+00DC 63                      
+00DD 36495620        384       db  036H, 049H, 056H, 020H, 050H ; &
+00E1 50                      
+00E2 00070300        385       db  000H, 007H, 003H, 000H, 000H ; '
 00E6 00                      
-00E7 62514949        379       db  062H, 051H, 049H, 049H, 046H ; 2
-00EB 46                      
-00EC 22494949        380       db  022H, 049H, 049H, 049H, 036H ; 3
-00F0 36                      
-00F1 1814127F        381       db  018H, 014H, 012H, 07FH, 010H ; 4
-00F5 10                      
-00F6 2F494949        382       db  02FH, 049H, 049H, 049H, 031H ; 5
-00FA 31                      
-00FB 3C4A4949        383       db  03CH, 04AH, 049H, 049H, 030H ; 6
-00FF 30                      
-0100 01710905        384       db  001H, 071H, 009H, 005H, 003H ; 7
-0104 03                      
-0105 36494949        385       db  036H, 049H, 049H, 049H, 036H ; 8
-0109 36                      
-010A 06494929        386       db  006H, 049H, 049H, 029H, 01EH ; 9
-010E 1E                      
-010F 006C6C00        387       db  000H, 06CH, 06CH, 000H, 000H ; :
-0113 00                      
-0114 00EC6C00        388       db  000H, 0ECH, 06CH, 000H, 000H ; ;
+00E7 003E4100        386       db  000H, 03EH, 041H, 000H, 000H ; (
+00EB 00                      
+00EC 00413E00        387       db  000H, 041H, 03EH, 000H, 000H ; )
+00F0 00                      
+00F1 083E1C3E        388       db  008H, 03EH, 01CH, 03EH, 008H ; *
+00F5 08                      
+00F6 08083E08        389       db  008H, 008H, 03EH, 008H, 008H ; +
+00FA 08                      
+00FB 00E06000        390       db  000H, 0E0H, 060H, 000H, 000H ; ,
+00FF 00                      
+0100 08080808        391       db  008H, 008H, 008H, 008H, 008H ; -
+0104 08                      
+0105 00606000        392       db  000H, 060H, 060H, 000H, 000H ; .
+0109 00                      
+010A 20100804        393       db  020H, 010H, 008H, 004H, 002H ; /
+010E 02                      
+010F 3E514945        394       db  03EH, 051H, 049H, 045H, 03EH ; 0
+0113 3E                      
+0114 00427F40        395       db  000H, 042H, 07FH, 040H, 000H ; 1
 0118 00                      
-0119 08142241        389       db  008H, 014H, 022H, 041H, 000H ; <
-011D 00                      
-011E 24242424        390       db  024H, 024H, 024H, 024H, 024H ; =
-0122 24                      
-0123 00412214        391       db  000H, 041H, 022H, 014H, 008H ; >
-0127 08                      
-0128 02015909        392       db  002H, 001H, 059H, 009H, 006H ; ?
-012C 06                      
-012D 3E415D55        393       db  03EH, 041H, 05DH, 055H, 01EH ; @
-0131 1E                      
-0132 7E111111        394       db  07EH, 011H, 011H, 011H, 07EH ; A
-0136 7E                      
-0137 7F494949        395       db  07FH, 049H, 049H, 049H, 036H ; B
+0119 62514949        396       db  062H, 051H, 049H, 049H, 046H ; 2
+011D 46                      
+011E 22494949        397       db  022H, 049H, 049H, 049H, 036H ; 3
+0122 36                      
+0123 1814127F        398       db  018H, 014H, 012H, 07FH, 010H ; 4
+0127 10                      
+0128 2F494949        399       db  02FH, 049H, 049H, 049H, 031H ; 5
+012C 31                      
+012D 3C4A4949        400       db  03CH, 04AH, 049H, 049H, 030H ; 6
+0131 30                      
+0132 01710905        401       db  001H, 071H, 009H, 005H, 003H ; 7
+0136 03                      
+0137 36494949        402       db  036H, 049H, 049H, 049H, 036H ; 8
 013B 36                      
-013C 3E414141        396       db  03EH, 041H, 041H, 041H, 022H ; C
-0140 22                      
-0141 7F414141        397       db  07FH, 041H, 041H, 041H, 03EH ; D
-0145 3E                      
-0146 7F494949        398       db  07FH, 049H, 049H, 049H, 041H ; E
-014A 41                      
-014B 7F090909        399       db  07FH, 009H, 009H, 009H, 001H ; F
-014F 01                      
-0150 3E414949        400       db  03EH, 041H, 049H, 049H, 07AH ; G
-0154 7A                      
-0155 7F080808        401       db  07FH, 008H, 008H, 008H, 07FH ; H
-0159 7F                      
-015A 00417F41        402       db  000H, 041H, 07FH, 041H, 000H ; I
-015E 00                      
-015F 30404040        403       db  030H, 040H, 040H, 040H, 03FH ; J
-0163 3F                      
-0164 7F081422        404       db  07FH, 008H, 014H, 022H, 041H ; K
-0168 41                      
-0169 7F404040        405       db  07FH, 040H, 040H, 040H, 040H ; L
-016D 40                      
-016E 7F020402        406       db  07FH, 002H, 004H, 002H, 07FH ; M
-0172 7F                      
-0173 7F020408        407       db  07FH, 002H, 004H, 008H, 07FH ; N
-0177 7F                      
-A51 MACRO ASSEMBLER  LCD_DRIVER                                                           04/22/2018 13:18:18 PAGE     8
+013C 06494929        403       db  006H, 049H, 049H, 029H, 01EH ; 9
+0140 1E                      
+0141 006C6C00        404       db  000H, 06CH, 06CH, 000H, 000H ; :
+0145 00                      
+0146 00EC6C00        405       db  000H, 0ECH, 06CH, 000H, 000H ; ;
+014A 00                      
+014B 08142241        406       db  008H, 014H, 022H, 041H, 000H ; <
+014F 00                      
+0150 24242424        407       db  024H, 024H, 024H, 024H, 024H ; =
+0154 24                      
+0155 00412214        408       db  000H, 041H, 022H, 014H, 008H ; >
+0159 08                      
+015A 02015909        409       db  002H, 001H, 059H, 009H, 006H ; ?
+015E 06                      
+015F 3E415D55        410       db  03EH, 041H, 05DH, 055H, 01EH ; @
+0163 1E                      
+0164 7E111111        411       db  07EH, 011H, 011H, 011H, 07EH ; A
+A51 MACRO ASSEMBLER  LCD_DRIVER                                                           04/24/2018 14:02:11 PAGE     8
 
-0178 3E414141        408       db  03EH, 041H, 041H, 041H, 03EH ; O
-017C 3E                      
-017D 7F090909        409       db  07FH, 009H, 009H, 009H, 006H ; P
-0181 06                      
-0182 3E415121        410       db  03EH, 041H, 051H, 021H, 05EH ; Q
-0186 5E                      
-0187 7F090919        411       db  07FH, 009H, 009H, 019H, 066H ; R
-018B 66                      
-018C 26494949        412       db  026H, 049H, 049H, 049H, 032H ; S
-0190 32                      
-0191 01017F01        413       db  001H, 001H, 07FH, 001H, 001H ; T
-0195 01                      
-0196 3F404040        414       db  03FH, 040H, 040H, 040H, 03FH ; U
-019A 3F                      
-019B 1F204020        415       db  01FH, 020H, 040H, 020H, 01FH ; V
-019F 1F                      
-01A0 3F403C40        416       db  03FH, 040H, 03CH, 040H, 03FH ; W
-01A4 3F                      
-01A5 63140814        417       db  063H, 014H, 008H, 014H, 063H ; X
-01A9 63                      
-01AA 07087008        418       db  007H, 008H, 070H, 008H, 007H ; Y
-01AE 07                      
-01AF 71494543        419       db  071H, 049H, 045H, 043H, 000H ; Z
-01B3 00                      
-01B4 007F4141        420       db  000H, 07FH, 041H, 041H, 000H ; [
-01B8 00                      
-01B9 02040810        421       db  002H, 004H, 008H, 010H, 020H ; \
-01BD 20                      
-01BE 0041417F        422       db  000H, 041H, 041H, 07FH, 000H ; ]
-01C2 00                      
-01C3 04020102        423       db  004H, 002H, 001H, 002H, 004H ; ^
-01C7 04                      
-01C8 80808080        424       db  080H, 080H, 080H, 080H, 080H ; _
-01CC 80                      
-01CD 00030700        425       db  000H, 003H, 007H, 000H, 000H ; `
-01D1 00                      
-01D2 20545454        426       db  020H, 054H, 054H, 054H, 078H ; a
-01D6 78                      
-01D7 7F444444        427       db  07FH, 044H, 044H, 044H, 038H ; b
-01DB 38                      
-01DC 38444444        428       db  038H, 044H, 044H, 044H, 028H ; c
-01E0 28                      
-01E1 38444444        429       db  038H, 044H, 044H, 044H, 07FH ; d
-01E5 7F                      
-01E6 38545454        430       db  038H, 054H, 054H, 054H, 008H ; e
-01EA 08                      
-01EB 087E0909        431       db  008H, 07EH, 009H, 009H, 000H ; f
-01EF 00                      
-01F0 18A4A4A4        432       db  018H, 0A4H, 0A4H, 0A4H, 07CH ; g
-01F4 7C                      
-01F5 7F040478        433       db  07FH, 004H, 004H, 078H, 000H ; h
-01F9 00                      
-01FA 00007D40        434       db  000H, 000H, 07DH, 040H, 000H ; i
-01FE 00                      
-01FF 4080847D        435       db  040H, 080H, 084H, 07DH, 000H ; j
+0168 7E                      
+0169 7F494949        412       db  07FH, 049H, 049H, 049H, 036H ; B
+016D 36                      
+016E 3E414141        413       db  03EH, 041H, 041H, 041H, 022H ; C
+0172 22                      
+0173 7F414141        414       db  07FH, 041H, 041H, 041H, 03EH ; D
+0177 3E                      
+0178 7F494949        415       db  07FH, 049H, 049H, 049H, 041H ; E
+017C 41                      
+017D 7F090909        416       db  07FH, 009H, 009H, 009H, 001H ; F
+0181 01                      
+0182 3E414949        417       db  03EH, 041H, 049H, 049H, 07AH ; G
+0186 7A                      
+0187 7F080808        418       db  07FH, 008H, 008H, 008H, 07FH ; H
+018B 7F                      
+018C 00417F41        419       db  000H, 041H, 07FH, 041H, 000H ; I
+0190 00                      
+0191 30404040        420       db  030H, 040H, 040H, 040H, 03FH ; J
+0195 3F                      
+0196 7F081422        421       db  07FH, 008H, 014H, 022H, 041H ; K
+019A 41                      
+019B 7F404040        422       db  07FH, 040H, 040H, 040H, 040H ; L
+019F 40                      
+01A0 7F020402        423       db  07FH, 002H, 004H, 002H, 07FH ; M
+01A4 7F                      
+01A5 7F020408        424       db  07FH, 002H, 004H, 008H, 07FH ; N
+01A9 7F                      
+01AA 3E414141        425       db  03EH, 041H, 041H, 041H, 03EH ; O
+01AE 3E                      
+01AF 7F090909        426       db  07FH, 009H, 009H, 009H, 006H ; P
+01B3 06                      
+01B4 3E415121        427       db  03EH, 041H, 051H, 021H, 05EH ; Q
+01B8 5E                      
+01B9 7F090919        428       db  07FH, 009H, 009H, 019H, 066H ; R
+01BD 66                      
+01BE 26494949        429       db  026H, 049H, 049H, 049H, 032H ; S
+01C2 32                      
+01C3 01017F01        430       db  001H, 001H, 07FH, 001H, 001H ; T
+01C7 01                      
+01C8 3F404040        431       db  03FH, 040H, 040H, 040H, 03FH ; U
+01CC 3F                      
+01CD 1F204020        432       db  01FH, 020H, 040H, 020H, 01FH ; V
+01D1 1F                      
+01D2 3F403C40        433       db  03FH, 040H, 03CH, 040H, 03FH ; W
+01D6 3F                      
+01D7 63140814        434       db  063H, 014H, 008H, 014H, 063H ; X
+01DB 63                      
+01DC 07087008        435       db  007H, 008H, 070H, 008H, 007H ; Y
+01E0 07                      
+01E1 71494543        436       db  071H, 049H, 045H, 043H, 000H ; Z
+01E5 00                      
+01E6 007F4141        437       db  000H, 07FH, 041H, 041H, 000H ; [
+01EA 00                      
+01EB 02040810        438       db  002H, 004H, 008H, 010H, 020H ; \
+01EF 20                      
+01F0 0041417F        439       db  000H, 041H, 041H, 07FH, 000H ; ]
+01F4 00                      
+01F5 04020102        440       db  004H, 002H, 001H, 002H, 004H ; ^
+01F9 04                      
+01FA 80808080        441       db  080H, 080H, 080H, 080H, 080H ; _
+01FE 80                      
+01FF 00030700        442       db  000H, 003H, 007H, 000H, 000H ; `
 0203 00                      
-0204 7F102844        436       db  07FH, 010H, 028H, 044H, 000H ; k
-0208 00                      
-0209 00007F40        437       db  000H, 000H, 07FH, 040H, 000H ; l
-020D 00                      
-020E 7C041804        438       db  07CH, 004H, 018H, 004H, 078H ; m
-0212 78                      
-0213 7C040478        439       db  07CH, 004H, 004H, 078H, 000H ; n
-0217 00                      
-0218 38444444        440       db  038H, 044H, 044H, 044H, 038H ; o
-021C 38                      
-A51 MACRO ASSEMBLER  LCD_DRIVER                                                           04/22/2018 13:18:18 PAGE     9
+0204 20545454        443       db  020H, 054H, 054H, 054H, 078H ; a
+0208 78                      
+0209 7F444444        444       db  07FH, 044H, 044H, 044H, 038H ; b
+A51 MACRO ASSEMBLER  LCD_DRIVER                                                           04/24/2018 14:02:11 PAGE     9
 
-021D FC444444        441       db  0FCH, 044H, 044H, 044H, 038H ; p
-0221 38                      
-0222 38444444        442       db  038H, 044H, 044H, 044H, 0FCH ; q
-0226 FC                      
-0227 44784404        443       db  044H, 078H, 044H, 004H, 008H ; r
-022B 08                      
-022C 08545454        444       db  008H, 054H, 054H, 054H, 020H ; s
-0230 20                      
-0231 043E4424        445       db  004H, 03EH, 044H, 024H, 000H ; t
+020D 38                      
+020E 38444444        445       db  038H, 044H, 044H, 044H, 028H ; c
+0212 28                      
+0213 38444444        446       db  038H, 044H, 044H, 044H, 07FH ; d
+0217 7F                      
+0218 38545454        447       db  038H, 054H, 054H, 054H, 008H ; e
+021C 08                      
+021D 087E0909        448       db  008H, 07EH, 009H, 009H, 000H ; f
+0221 00                      
+0222 18A4A4A4        449       db  018H, 0A4H, 0A4H, 0A4H, 07CH ; g
+0226 7C                      
+0227 7F040478        450       db  07FH, 004H, 004H, 078H, 000H ; h
+022B 00                      
+022C 00007D40        451       db  000H, 000H, 07DH, 040H, 000H ; i
+0230 00                      
+0231 4080847D        452       db  040H, 080H, 084H, 07DH, 000H ; j
 0235 00                      
-0236 3C40207C        446       db  03CH, 040H, 020H, 07CH, 000H ; u
+0236 7F102844        453       db  07FH, 010H, 028H, 044H, 000H ; k
 023A 00                      
-023B 1C204020        447       db  01CH, 020H, 040H, 020H, 01CH ; v
-023F 1C                      
-0240 3C603060        448       db  03CH, 060H, 030H, 060H, 03CH ; w
-0244 3C                      
-0245 6C10106C        449       db  06CH, 010H, 010H, 06CH, 000H ; x
+023B 00007F40        454       db  000H, 000H, 07FH, 040H, 000H ; l
+023F 00                      
+0240 7C041804        455       db  07CH, 004H, 018H, 004H, 078H ; m
+0244 78                      
+0245 7C040478        456       db  07CH, 004H, 004H, 078H, 000H ; n
 0249 00                      
-024A 9CA0603C        450       db  09CH, 0A0H, 060H, 03CH, 000H ; y
-024E 00                      
-024F 6454544C        451       db  064H, 054H, 054H, 04CH, 000H ; z
-0253 00                      
-0254 083E4141        452       db  008H, 03EH, 041H, 041H, 000H ; {
-0258 00                      
-0259 00007700        453       db  000H, 000H, 077H, 000H, 000H ; |
-025D 00                      
-025E 0041413E        454       db  000H, 041H, 041H, 03EH, 008H ; }
-0262 08                      
-0263 02010201        455       db  002H, 001H, 002H, 001H, 000H ; ~
+024A 38444444        457       db  038H, 044H, 044H, 044H, 038H ; o
+024E 38                      
+024F FC444444        458       db  0FCH, 044H, 044H, 044H, 038H ; p
+0253 38                      
+0254 38444444        459       db  038H, 044H, 044H, 044H, 0FCH ; q
+0258 FC                      
+0259 44784404        460       db  044H, 078H, 044H, 004H, 008H ; r
+025D 08                      
+025E 08545454        461       db  008H, 054H, 054H, 054H, 020H ; s
+0262 20                      
+0263 043E4424        462       db  004H, 03EH, 044H, 024H, 000H ; t
 0267 00                      
-0268 06090906        456       db  006H, 009H, 009H, 006H, 000H ; °
+0268 3C40207C        463       db  03CH, 040H, 020H, 07CH, 000H ; u
 026C 00                      
-                     457     
-----                 458             xseg
-0000                 459     screen: ds 1024
-                     460     
-                     461             end
-A51 MACRO ASSEMBLER  LCD_DRIVER                                                           04/22/2018 13:18:18 PAGE    10
+026D 1C204020        464       db  01CH, 020H, 040H, 020H, 01CH ; v
+0271 1C                      
+0272 3C603060        465       db  03CH, 060H, 030H, 060H, 03CH ; w
+0276 3C                      
+0277 6C10106C        466       db  06CH, 010H, 010H, 06CH, 000H ; x
+027B 00                      
+027C 9CA0603C        467       db  09CH, 0A0H, 060H, 03CH, 000H ; y
+0280 00                      
+0281 6454544C        468       db  064H, 054H, 054H, 04CH, 000H ; z
+0285 00                      
+0286 083E4141        469       db  008H, 03EH, 041H, 041H, 000H ; {
+028A 00                      
+028B 00007700        470       db  000H, 000H, 077H, 000H, 000H ; |
+028F 00                      
+0290 0041413E        471       db  000H, 041H, 041H, 03EH, 008H ; }
+0294 08                      
+0295 02010201        472       db  002H, 001H, 002H, 001H, 000H ; ~
+0299 00                      
+029A 06090906        473       db  006H, 009H, 009H, 006H, 000H ; °
+029E 00                      
+                     474     
+                     475     
+----                 476             xseg
+0000                 477     screen: ds 1024
+                     478     
+                     479             end
+A51 MACRO ASSEMBLER  LCD_DRIVER                                                           04/24/2018 14:02:11 PAGE    10
 
 XREF SYMBOL TABLE LISTING
 ---- ------ ----- -------
@@ -588,7 +616,7 @@ XREF SYMBOL TABLE LISTING
 
 N A M E             T Y P E  V A L U E   ATTRIBUTES / REFERENCES
 
-?PR?LCD. . . . . .  C SEG    026DH       REL=UNIT   3# 4
+?PR?LCD. . . . . .  C SEG    029FH       REL=UNIT   3# 4
 AA . . . . . . . .  B ADDR   00C0H.2 A      187#
 AC . . . . . . . .  B ADDR   00D0H.6 A      210#
 ACC. . . . . . . .  D ADDR   00E0H   A      111# 261 283
@@ -648,7 +676,7 @@ EMI0CF . . . . . .  D ADDR   00A3H   A      54# 296
 EMI0CN . . . . . .  D ADDR   00AFH   A      66# 259 281 284
 EMI0TC . . . . . .  D ADDR   00A1H   A      53# 297
 ENSMB. . . . . . .  B ADDR   00C0H.6 A      191#
-A51 MACRO ASSEMBLER  LCD_DRIVER                                                           04/22/2018 13:18:18 PAGE    11
+A51 MACRO ASSEMBLER  LCD_DRIVER                                                           04/24/2018 14:02:11 PAGE    11
 
 ES . . . . . . . .  B ADDR   00A8H.4 A      172#
 ET0. . . . . . . .  B ADDR   00A8H.1 A      169#
@@ -662,7 +690,7 @@ F0 . . . . . . . .  B ADDR   00D0H.5 A      209#
 F1 . . . . . . . .  B ADDR   00D0H.1 A      205#
 FLACL. . . . . . .  D ADDR   00B7H   A      72#
 FLSCL. . . . . . .  D ADDR   00B6H   A      71#
-FONT5X8. . . . . .  C ADDR   008DH   R   SEG=?PR?LCD   1 360#
+FONT5X8. . . . . .  C ADDR   00BFH   R   SEG=?PR?LCD   1 377#
 IE . . . . . . . .  D ADDR   00A8H   A      59# 168 169 170 171 172 173 174
 IE0. . . . . . . .  B ADDR   0088H.1 A      149#
 IE1. . . . . . . .  B ADDR   0088H.3 A      151#
@@ -716,7 +744,7 @@ PCA0L. . . . . . .  D ADDR   00E9H   A      120#
 PCA0MD . . . . . .  D ADDR   00D9H   A      105#
 PCON . . . . . . .  D ADDR   0087H   A      28#
 PS . . . . . . . .  B ADDR   00B8H.4 A      181#
-A51 MACRO ASSEMBLER  LCD_DRIVER                                                           04/22/2018 13:18:18 PAGE    12
+A51 MACRO ASSEMBLER  LCD_DRIVER                                                           04/24/2018 14:02:11 PAGE    12
 
 PSCTL. . . . . . .  D ADDR   008FH   A      36#
 PSW. . . . . . . .  D ADDR   00D0H   A      96# 204 205 206 207 208 209 210 211
@@ -747,7 +775,8 @@ SBUF0. . . . . . .  D ADDR   0099H   A      45#
 SBUF1. . . . . . .  D ADDR   00F2H   A      129#
 SCON0. . . . . . .  D ADDR   0098H   A      44# 158 159 160 161 162 163 164 165
 SCON1. . . . . . .  D ADDR   00F1H   A      128#
-SCREEN . . . . . .  X ADDR   0000H   A      1 459#
+SCORE5X8 . . . . .  C ADDR   008DH   R   SEG=?PR?LCD   1 361#
+SCREEN . . . . . .  X ADDR   0000H   A      1 477#
 SI . . . . . . . .  B ADDR   00C0H.3 A      188#
 SLVSEL . . . . . .  B ADDR   00F8H.2 A      235#
 SM0. . . . . . . .  B ADDR   0098H.7 A      165#
@@ -783,9 +812,9 @@ TH2. . . . . . . .  D ADDR   00CDH   A      94#
 TH4. . . . . . . .  D ADDR   00F5H   A      132#
 TI . . . . . . . .  B ADDR   0098H.1 A      159#
 TL0. . . . . . . .  D ADDR   008AH   A      31#
-TL1. . . . . . . .  D ADDR   008BH   A      32#
-A51 MACRO ASSEMBLER  LCD_DRIVER                                                           04/22/2018 13:18:18 PAGE    13
+A51 MACRO ASSEMBLER  LCD_DRIVER                                                           04/24/2018 14:02:11 PAGE    13
 
+TL1. . . . . . . .  D ADDR   008BH   A      32#
 TL2. . . . . . . .  D ADDR   00CCH   A      93#
 TL4. . . . . . . .  D ADDR   00F4H   A      131#
 TMOD . . . . . . .  D ADDR   0089H   A      30#

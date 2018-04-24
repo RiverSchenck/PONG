@@ -1,4 +1,4 @@
-public init_lcd, refresh_screen, blank_screen, screen, font5x8;
+public init_lcd, refresh_screen, blank_screen, screen, font5x8, score5x8;
 
 ?PR?lcd segment code
 	rseg ?PR?lcd
@@ -123,17 +123,18 @@ blank_loop:
 	ret
 
 font5x8:
+	
   db  000H, 000H, 000H, 000H, 000H ;  
-  db  000H, 006H, 05FH, 006H, 000H ; !
-  db  007H, 003H, 000H, 007H, 003H ; "
-  db  024H, 07EH, 024H, 07EH, 024H ; #
-  db  024H, 02BH, 06AH, 012H, 000H ; $
-  db  063H, 013H, 008H, 064H, 063H ; %
-  db  036H, 049H, 056H, 020H, 050H ; &
-  db  000H, 007H, 003H, 000H, 000H ; '
-  db  000H, 03EH, 041H, 000H, 000H ; (
-  db  000H, 041H, 03EH, 000H, 000H ; )
-  db  008H, 03EH, 01CH, 03EH, 008H ; *
+db  03EH, 051H, 049H, 045H, 03EH ; 0
+  db  000H, 042H, 07FH, 040H, 000H ; 1
+  db  062H, 051H, 049H, 049H, 046H ; 2
+  db  022H, 049H, 049H, 049H, 036H ; 3
+  db  018H, 014H, 012H, 07FH, 010H ; 4
+  db  02FH, 049H, 049H, 049H, 031H ; 5
+  db  03CH, 04AH, 049H, 049H, 030H ; 6
+  db  001H, 071H, 009H, 005H, 003H ; 7
+  db  036H, 049H, 049H, 049H, 036H ; 8
+  db  006H, 049H, 049H, 029H, 01EH ; 9
   db  008H, 008H, 03EH, 008H, 008H ; +
   db  000H, 0E0H, 060H, 000H, 000H ; ,
   db  008H, 008H, 008H, 008H, 008H ; -
@@ -219,6 +220,17 @@ font5x8:
   db  000H, 041H, 041H, 03EH, 008H ; }
   db  002H, 001H, 002H, 001H, 000H ; ~
   db  006H, 009H, 009H, 006H, 000H ; °
+
+	score5x8:
+	db  000H, 042H, 07FH, 040H, 000H ; 1
+  db  062H, 051H, 049H, 049H, 046H ; 2
+  db  022H, 049H, 049H, 049H, 036H ; 3
+  db  018H, 014H, 012H, 07FH, 010H ; 4
+  db  02FH, 049H, 049H, 049H, 031H ; 5
+  db  03CH, 04AH, 049H, 049H, 030H ; 6
+  db  001H, 071H, 009H, 005H, 003H ; 7
+  db  036H, 049H, 049H, 049H, 036H ; 8
+  db  006H, 049H, 049H, 029H, 01EH ; 9
 
 	xseg
 screen:	ds 1024

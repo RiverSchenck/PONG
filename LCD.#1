@@ -35,5 +35,3 @@ extern xdata char screen[];
 // a one pixel space between characters.
 // 
 extern code char font5x8[];
-
-extern code char score5x8[];
