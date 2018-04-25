@@ -1,0 +1,77 @@
+C51 COMPILER V9.55   PONGHEADER                                                            04/24/2018 16:44:29 PAGE 1   
+
+
+C51 COMPILER V9.55, COMPILATION OF MODULE PONGHEADER
+OBJECT MODULE PLACED IN PONGHEADER.OBJ
+COMPILER INVOKED BY: C:\Keil\C51\BIN\c51.exe PONGHEADER.h DB OE BR INCDIR(C:\SiLabs\MCU\Inc)
+
+line level    source
+
+   1          #include <C8051F020.h>  
+   2          
+   3          //-------------------------------------------------------------
+   4          //variables
+   5          //-------------------------------------------------------------  
+   6          unsigned char score1=0, score2=0;               //START SCORE AT 0
+   7          char paddle1, paddle2;
+   8          char run = 1;                           //SET  BALL ANGLE AT 1/1                           
+   9          char rise = 1;                                             
+  10          char show_score = 0;            //SET LOOP FOR SHOWING SCORE TO 0
+  11          char paddle_bottom, paddle_top, paddle_height;
+  12          int paddle1height, paddle1top=20, paddle1bottom;
+  13          int paddle2height, paddle2top=20, paddle2bottom;
+  14          int ball_x, ball_y, ball_left, ball_right, ball_top, ball_bottom;
+  15          int soccer;
+  16          char switches;  
+  17          sbit BTN1 = P2^2;                       //BTN1 FOR START GAME
+  18          sbit LED9 = P2^4;
+  19          sbit LED10 = P2^5;
+  20          
+  21          
+  22          
+  23          //-------------------------------------------------------------
+  24          //functions
+  25          //------------------------------------------------------------- 
+  26          void move_comps(void);//DONE
+  27          void init_game (void);//DONE
+  28          void onemillidelay(unsigned int); //DONE
+  29          unsigned char put_char(unsigned char, unsigned char, char);// DONE
+  30          void get_switches(void);//DONE
+  31          void init_text(void); //DONE
+  32          void speed(char);//DONE
+  33          void sound(int);//DONE
+  34          void winner(void);//DONE
+  35          void soccermode(void);//DONE
+  36          void display_scores (char, char); //DONE
+  37          void randomserve(void);
+  38          void draw_paddle (int, int, char);
+  39          void draw_ball (int, int
+  40          
+  41          
+  42          
+  43          //-------------------------------------------------------------
+  44          //SERVES RANDOM
+  45          //------------------------------------------------------------- 
+  46          char random[] = {-2, -1, 1, 2};
+*** ERROR C141 IN LINE 46 OF PONGHEADER.h: syntax error near 'char'
+  47          char serve[] = {110, 8, 110, 8};
+  48          char count=1;
+  49          
+  50          //-------------------------------------------------------------
+  51          //SOUND
+  52          //-------------------------------------------------------------
+  53          code unsigned char sine[] = { 176, 217, 244, 254, 244, 217, 176, 128, 80, 39, 12, 2, 12, 39, 80, 128 };
+  54          unsigned char phase = sizeof(sine)-1;
+C51 COMPILER V9.55   PONGHEADER                                                            04/24/2018 16:44:29 PAGE 2   
+
+*** ERROR C158 IN LINE 54 OF PONGHEADER.h: '_draw_ball': function contains unnamed parameter
+*** ERROR C141 IN LINE 54 OF PONGHEADER.h: syntax error near '-'
+  55          unsigned int duration;
+  56          
+  57          
+  58          
+  59          
+  60          
+  61          
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  3 ERROR(S)

@@ -4,5 +4,5 @@ COPYRIGHT KEIL ELEKTRONIK GmbH 1987 - 2009
 "C:\SiLabs\Projects\Pong\PONGPONG.obj",
 "C:\SiLabs\Projects\Pong\LCD_driver.obj"  TO "C:\SiLabs\Projects\Pong\PONGPONG" RS(256) PL(68) PW(78) 
 
-Program Size: data=75.0 xdata=1024 code=4162
+Program Size: data=70.0 xdata=1024 code=4293
 LINK/LOCATE RUN COMPLETE.  0 WARNING(S),  0 ERROR(S)

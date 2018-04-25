@@ -1,4 +1,4 @@
-C51 COMPILER V9.55   PONGPONG                                                              04/24/2018 14:02:10 PAGE 1   
+C51 COMPILER V9.55   PONGPONG                                                              04/24/2018 17:32:03 PAGE 1   
 
 
 C51 COMPILER V9.55, COMPILATION OF MODULE PONGPONG
@@ -8,728 +8,774 @@ COMPILER INVOKED BY: C:\Keil\C51\BIN\c51.exe PONGPONG.c DB OE BR INCDIR(C:\SiLab
 line level    source
 
    1          #include <C8051F020.h>
-   2          #include <lcd.h>
-   3          #include <pongheader.h>
-   4          
+   2          #include <stdlib.h>
+   3          #include <lcd.h>
+   4          #include <pongheader.h>
    5          
    6          
-   7          void main(void)
-   8          {
-   9   1      
-  10   1      //----------------------------------
-  11   1      //Init
-  12   1      //-----------------------------------
-  13   1              WDTCN = 0xde;// disable watch dog
-  14   1              WDTCN = 0xad;
-  15   1              XBR2 = 0x40; // enable port output
-  16   1              XBR0 = 4;
-  17   1              OSCXCN = 0x67; // TURN ON EXTERNAL CRYSTAL
-  18   1              TMOD = 0x22; // wait 1ms using t1 mode2
-  19   1              TH1 = -167; // 2MHZ CLOCK, 167 COUNTS - 1MS
-  20   1              TR1 = 1;
-  21   1              while (TF1 == 0) {} //wait 1ms
-  22   1              while (!(OSCXCN & 0x80) ) {} //wait till oscillator stable
-  23   1              OSCICN = 8; // switch over to 22.1184mhz
-  24   1              SCON0 = 0x50; // 8-BIT, VARIABLE BAUD, RECEIVE ENABLE
-  25   1              TH1 = -6;  // 9600 BAUD
-  26   1              REF0CN = 0x07; // ref0 voltage
-  27   1              ADC0CF = 0xf4; // GAIN
-  28   1              ADC0CN = 0x80; //ENALBE AD
-  29   1              IE = 0xA2;
-  30   1              IP = 0x20;
-  31   1              DAC0CN = 0x9C;
-  32   1              T2CON = 0x00;
-  33   1              TH1 = 0; //set timer 1 for a two bit timer
-  34   1              TH0 = 0;
-  35   1              TR0 = 1;
-  36   1      
-  37   1      
-  38   1      //----------------------        
-  39   1      //initializing game
-  40   1      //----------------------                        
-  41   1                      init_lcd();
-  42   1                      blank_screen();
-  43   1                      init_text();
-  44   1                      get_switches();
-  45   1                      init_game();
-  46   1                      display_scores(score1, score2);
-  47   1                      ball_x = start_x;
-  48   1                      ball_y = start_y;
-  49   1      
-  50   1      //----------------------        
-  51   1      //Playing game
-  52   1      //----------------------
-  53   1              for(;;) {
-  54   2      
-  55   2                      //SHOW SCORE LOOP. IE AFTER A POINT IS SCORED
-C51 COMPILER V9.55   PONGPONG                                                              04/24/2018 14:02:10 PAGE 2   
+   7          
+   8          sbit BTN1 = P2^2;                       //BTN1 FOR START GAME
+   9          sbit BTN2 = P2^3;
+  10          unsigned char LED18;
+  11          sbit LED9 = P2^4;
+  12          sbit LED10 = P2^5;
+  13          
+  14          
+  15          void main(void)
+  16          {
+  17   1      
+  18   1      //----------------------------------
+  19   1      //Init
+  20   1      //-----------------------------------
+  21   1              WDTCN = 0xde;// disable watch dog
+  22   1              WDTCN = 0xad;
+  23   1              XBR2 = 0x40; // enable port output
+  24   1              XBR0 = 4;
+  25   1              OSCXCN = 0x67; // TURN ON EXTERNAL CRYSTAL
+  26   1              TMOD = 0x22; // wait 1ms using t1 mode2
+  27   1              TH1 = -167; // 2MHZ CLOCK, 167 COUNTS - 1MS
+  28   1              TR1 = 1;
+  29   1              while (TF1 == 0) {} //wait 1ms
+  30   1              while (!(OSCXCN & 0x80) ) {} //wait till oscillator stable
+  31   1              OSCICN = 8; // switch over to 22.1184mhz
+  32   1              SCON0 = 0x50; // 8-BIT, VARIABLE BAUD, RECEIVE ENABLE
+  33   1              TH1 = -6;  // 9600 BAUD
+  34   1              REF0CN = 0x07; // ref0 voltage
+  35   1              ADC0CF = 0xf4; // GAIN
+  36   1              ADC0CN = 0x80; //ENALBE AD
+  37   1              IE = 0xA2;
+  38   1              IP = 0x20;
+  39   1              DAC0CN = 0x9C;
+  40   1              T2CON = 0x00;
+  41   1              TH1 = 0; //set timer 1 for a two bit timer
+  42   1              TH0 = 0;
+  43   1              TR0 = 1;
+  44   1      
+  45   1      
+  46   1      //----------------------        
+  47   1      //initializing game
+  48   1      //----------------------                        
+  49   1                      init_lcd();
+  50   1                      blank_screen();
+  51   1                      init_text();
+  52   1                      get_switches();
+  53   1                      init_game();
+  54   1                      display_scores(score1, score2);
+  55   1      
+C51 COMPILER V9.55   PONGPONG                                                              04/24/2018 17:32:03 PAGE 2   
 
-  56   2                      while(show_score == 0) {
-  57   3                                      display_scores(score1, score2);
-  58   3                                      onemillidelay(2000);//DELAY TO SHOW THE SCORE OF THE GAME
-  59   3                                      get_switches();
-  60   3                                      draw_ball(ball_x, ball_y);
-  61   3                                      show_score = 1;
-  62   3                              }
-  63   2                              //PLAYING GAME LOOP
-  64   2                              while(show_score == 1)
-  65   2                              {
-  66   3                                      if(TMR3CN == 0x84)//If the overflow flag is raised
-  67   3                                      {
-  68   4                                              //CHECKS TO SEE IF SOMEONE HAS WON
-  69   4                                              if(score1 < 11 && score2 < 11) {
-  70   5      
-  71   5                                              blank_screen();         //The screen is blanked and
-  72   5                                              ball_x += dx;                   //the ball is moved the distance
-  73   5                                              ball_y += dy;                   //and direction that is being
-  74   5                                              init_game();                    //in the move_ball function
-  75   5                                              get_switches(); 
-  76   5                                              move_comps();
-  77   5                                              draw_ball(ball_x, ball_y);
-  78   5                                              refresh_screen();       
-  79   5                                              TMR3CN &= 0x7F;                         
-  80   5                                              }                
-  81   4                                              else if(score1 == 11 || score2 == 11)
-  82   4                                              {
-  83   5                                                      winner();
-  84   5                                                      return;
-  85   5                                              }//end else if
-  86   4      
-  87   4                                      }//end if
-  88   3      
-  89   3                              }//end while
-  90   2              
-  91   2              }//end for
-  92   1      
-  93   1      }//end main
-  94          
-  95          
-  96          
-  97          
-  98          
+  56   1      //----------------------        
+  57   1      //Playing game
+  58   1      //----------------------
+  59   1              while(BTN2 == 1) {
+  60   2      
+  61   2      
+  62   2                      //SHOW SCORE LOOP. IE AFTER A POINT IS SCORED
+  63   2                      while(show_score == 0) {
+  64   3                                      display_scores(score1, score2);
+  65   3                                      onemillidelay(2000);//DELAY TO SHOW THE SCORE OF THE GAME
+  66   3                                      get_switches();
+  67   3                                      draw_ball(ball_x, ball_y);
+  68   3                                      show_score = 1;
+  69   3                              }
+  70   2                              //PLAYING GAME LOOP
+  71   2                              while(show_score == 1 && BTN2 == 1)
+  72   2                              {
+  73   3                                      if(TMR3CN == 0x84)//If the overflow flag is raised
+  74   3                                      {
+  75   4                                              //CHECKS TO SEE IF SOMEONE HAS WON
+  76   4                                              if(score1 < 11 && score2 < 11) {
+  77   5      
+  78   5                                              blank_screen();                         
+  79   5                                              init_game();                    
+  80   5                                              get_switches(); 
+  81   5                                              move_comps();
+  82   5                                              draw_ball(ball_x, ball_y);
+  83   5                                              refresh_screen();       
+  84   5                                              TMR3CN &= 0x7F; 
+  85   5                                              }                                                                        
+  86   4                                              else if(score1 == 11 || score2 == 11)
+  87   4                                              {
+  88   5                                                      winner();
+  89   5                                                      return;
+  90   5                                              }//end else if
+  91   4      
+  92   4                                      }//end if
+  93   3              
+  94   3                              }//end while
+  95   2              
+  96   2              }//end for
+  97   1      
+  98   1      }//end main
   99          
- 100          //==============================================================================
- 101          //TIMERS
- 102          //
+ 100          
+ 101          
+ 102          
  103          //==============================================================================
- 104          
- 105          void timer_0(void) interrupt 1
- 106          {
- 107   1              start_x ^= 0x78;
- 108   1      
- 109   1              dx = -dx;
- 110   1              if(random_count < sizeof(dy_random)-1)//If less than 10 enter loop
- 111   1              {
- 112   2                      dy = dy_random[random_count];//set change in y to random value
- 113   2                      random_count++;                          //and increment the count
- 114   2              }
- 115   1              else if(random_count == sizeof(dy_random)-1)//If equal to 10 enter loop
- 116   1              {
- 117   2                      dy = dy_random[random_count];//set change in y to random value
-C51 COMPILER V9.55   PONGPONG                                                              04/24/2018 14:02:10 PAGE 3   
+ 104          //TIMERS
+ 105          //
+ 106          //==============================================================================
+ 107          
+ 108          void timer_0(void) interrupt 1
+ 109          {
+ 110   1              if(count < 3)
+ 111   1              {       
+ 112   2                      rise = random[count];
+ 113   2                      ball_x = serve[count];
+ 114   2                      count++;                        
+ 115   2              }
+ 116   1              else if(count == 3)
+ 117   1              {
+C51 COMPILER V9.55   PONGPONG                                                              04/24/2018 17:32:03 PAGE 3   
 
- 118   2                      random_count = 0;                        //and reset the count to 0
- 119   2              }
- 120   1      }
- 121          
- 122          
- 123          
- 124          void timer2(void) interrupt 5
- 125          {
- 126   1      
- 127   1                      TF2 = 0;
- 128   1                      DAC0H = sine[phase];
- 129   1                      if ( phase < sizeof(sine)-1 )   // if mid-cycle
- 130   1                      {                               // complete it
- 131   2                              phase++;
- 132   2                      }
- 133   1                      else if ( duration > 0 )        // if more cycles left to go
- 134   1                      {                               // start a new cycle
- 135   2                              phase = 0;
- 136   2                              duration--;
- 137   2                      }
- 138   1                      if ( duration == 0)
- 139   1                      {
- 140   2                              TR2 = 0;
- 141   2                      }
- 142   1              
- 143   1      }
- 144          
- 145          
- 146          
- 147          //==============================================================================
- 148          //ONEMILLIDELAY
- 149          //dealy of i time, from the book
- 150          //==============================================================================
- 151          void onemillidelay(unsigned int time) 
- 152          {
- 153   1      unsigned int i; 
- 154   1      unsigned int j; 
- 155   1      for(i=0; i<time; i++)   
- 156   1      for(j=0; j<1843; j++);
- 157   1      }
- 158          
- 159          
- 160          
+ 118   2                      rise = random[count];
+ 119   2                      count = 0;                      
+ 120   2              }
+ 121   1      
+ 122   1      
+ 123   1              if(ball_x ==110) {
+ 124   2                      run = -1;
+ 125   2              }
+ 126   1              else{
+ 127   2                      run = 1;
+ 128   2              }
+ 129   1              ball_y = 30;
+ 130   1      
+ 131   1      }
+ 132          
+ 133          
+ 134          
+ 135          void timer2(void) interrupt 5
+ 136          {
+ 137   1      
+ 138   1                      TF2 = 0;
+ 139   1                      DAC0H = sine[phase];
+ 140   1                      if ( phase < sizeof(sine)-1 )   // if mid-cycle
+ 141   1                      {                               // complete it
+ 142   2                              phase++;
+ 143   2                      }
+ 144   1                      else if ( duration > 0 )        // if more cycles left to go
+ 145   1                      {                               // start a new cycle
+ 146   2                              phase = 0;
+ 147   2                              duration--;
+ 148   2                      }
+ 149   1                      if ( duration == 0)
+ 150   1                      {
+ 151   2                              TR2 = 0;
+ 152   2                      }
+ 153   1              
+ 154   1      }
+ 155          
+ 156          
+ 157          
+ 158          //==============================================================================
+ 159          //ONEMILLIDELAY
+ 160          //dealy of i time, from the book
  161          //==============================================================================
- 162          //PUT_CHAR
- 163          //inserts characters
- 164          //==============================================================================
- 165          unsigned char put_char (unsigned char row, unsigned char col, char ch) {
- 166   1                      int loc = row * 128 + col;
- 167   1                      int font = (ch - ' ') * 5;
- 168   1                      char i;
- 169   1                      for (i=0; i<5; i++)
- 170   1                      {
- 171   2                              screen[loc +i] = font5x8[font+i];
- 172   2                      }
- 173   1                      return (0);
- 174   1      }
- 175          
- 176          
- 177          
- 178          //==============================================================================
- 179          //INIT_GAME
-C51 COMPILER V9.55   PONGPONG                                                              04/24/2018 14:02:10 PAGE 4   
+ 162          void onemillidelay(unsigned int time) 
+ 163          {
+ 164   1      unsigned int i; 
+ 165   1      unsigned int j; 
+ 166   1      for(i=0; i<time; i++)   
+ 167   1      for(j=0; j<1843; j++);
+ 168   1      }
+ 169          
+ 170          
+ 171          
+ 172          //==============================================================================
+ 173          //PUT_CHAR
+ 174          //inserts characters
+ 175          //==============================================================================
+ 176          unsigned char put_char (unsigned char row, unsigned char col, char ch) {
+ 177   1                      int loc = row * 128 + col;
+ 178   1                      int font = (ch - ' ') * 5;
+ 179   1                      char i;
+C51 COMPILER V9.55   PONGPONG                                                              04/24/2018 17:32:03 PAGE 4   
 
- 180          //draws the bounds for the game
- 181          //==============================================================================
- 182          void init_game () {
- 183   1      
- 184   1                      unsigned int i;
- 185   1                      //TOP BOUNDARY
- 186   1                      for(i=0; i<127; i++) {
- 187   2                              screen[i] = 0x03; 
- 188   2                      }
- 189   1                      //BOTTOM BOUNDARY
- 190   1                      for(i=0; i<127; i++) {
- 191   2                              screen[896+i] = 0xC0; 
- 192   2                      }
- 193   1      
- 194   1                      //-----------------------
- 195   1                      //SOCCER MODE
- 196   1                      //-----------------------
- 197   1                      if (soccer == 0) {
- 198   2                              soccermode();
- 199   2      
- 200   2      
- 201   2                      }
- 202   1                      else {
- 203   2                              //NET
- 204   2                              screen[63] = 0xCF;
- 205   2                              screen[64] = 0xCF;
- 206   2                              for(i=191; i<960; i++) {
- 207   3                                      screen[i+1] = 0xCC;
- 208   3                                      screen[i] = 0xCC; 
- 209   3                                      i= i+127;
- 210   3                              }
+ 180   1                      for (i=0; i<5; i++)
+ 181   1                      {
+ 182   2                              screen[loc +i] = font5x8[font+i];
+ 183   2                      }
+ 184   1                      return (0);
+ 185   1      }
+ 186          
+ 187          
+ 188          
+ 189          //==============================================================================
+ 190          //INIT_GAME
+ 191          //draws the bounds for the game
+ 192          //==============================================================================
+ 193          void init_game () {
+ 194   1      
+ 195   1                      unsigned int i;
+ 196   1                      //TOP BOUNDARY
+ 197   1                      for(i=0; i<127; i++) {
+ 198   2                              screen[i] = 0x03; 
+ 199   2                      }
+ 200   1                      //BOTTOM BOUNDARY
+ 201   1                      for(i=0; i<127; i++) {
+ 202   2                              screen[896+i] = 0xC0; 
+ 203   2                      }
+ 204   1      
+ 205   1                      //-----------------------
+ 206   1                      //SOCCER MODE
+ 207   1                      //-----------------------
+ 208   1                      if (soccer == 0) {
+ 209   2                              soccermode();
+ 210   2      
  211   2      
  212   2                      }
- 213   1      }
- 214          
- 215          
- 216          
- 217          //==============================================================================
- 218          //INIT_TEXT
- 219          //Prints HELLO PRESS START TO PLAY!
- 220          //==============================================================================
- 221          void init_text(void) {
- 222   1      
- 223   1                      put_char(1,0, 'H'); put_char(1,6, 'E'); put_char(1,12,'L');     put_char(1,18,'L'); //displays HELLO
- 224   1                      put_char(1,24,'O'); put_char(1,32,' ');
- 225   1      
- 226   1                      put_char(1,38,'P'); put_char(1,44,'R'); put_char(1,50,'E'); put_char(1,56,'S'); //displays PRESS
- 227   1                      put_char(1,62,'S'); put_char(1,68,' '); 
- 228   1              
- 229   1                      put_char(1,74,'S'); put_char(1,80,'T'); put_char(1,84,'A'); put_char(1,90,'R'); //displays START TO
- 230   1                      put_char(1,96,'T'); put_char(1,102,' '); put_char(1,108,'T'); put_char(1,114,'O'); 
- 231   1      
- 232   1                      put_char(3,52, 'P'); put_char(3,58, 'L'); put_char(3,64, 'A'); put_char(3,70, 'Y'); //PLAY!
- 233   1                      put_char(3,76,'!');     put_char(6,30,' ');     put_char(6,36,' '); put_char(6,42,' ');
- 234   1      
- 235   1                      refresh_screen();
- 236   1                      while(BTN1) {
- 237   2      
- 238   2                      }
- 239   1                      blank_screen();
- 240   1      
- 241   1                      ball_x = start_x;
-C51 COMPILER V9.55   PONGPONG                                                              04/24/2018 14:02:10 PAGE 5   
+ 213   1                      else {
+ 214   2                              //NET
+ 215   2                              screen[63] = 0xCF;
+ 216   2                              screen[64] = 0xCF;
+ 217   2                              for(i=191; i<960; i++) {
+ 218   3                                      screen[i+1] = 0xCC;
+ 219   3                                      screen[i] = 0xCC; 
+ 220   3                                      i= i+127;
+ 221   3                              }
+ 222   2      
+ 223   2                      }
+ 224   1      }
+ 225          
+ 226          
+ 227          
+ 228          //==============================================================================
+ 229          //INIT_TEXT
+ 230          //Prints HELLO PRESS START TO PLAY!
+ 231          //==============================================================================
+ 232          void init_text(void) {
+ 233   1      
+ 234   1                      put_char(1,0, 'H'); put_char(1,6, 'E'); put_char(1,12,'L');     put_char(1,18,'L'); //displays HELLO
+ 235   1                      put_char(1,24,'O'); put_char(1,32,' ');
+ 236   1      
+ 237   1                      put_char(1,38,'P'); put_char(1,44,'R'); put_char(1,50,'E'); put_char(1,56,'S'); //displays PRESS
+ 238   1                      put_char(1,62,'S'); put_char(1,68,' '); 
+ 239   1              
+ 240   1                      put_char(1,74,'S'); put_char(1,80,'T'); put_char(1,84,'A'); put_char(1,90,'R'); //displays START TO
+ 241   1                      put_char(1,96,'T'); put_char(1,102,' '); put_char(1,108,'T'); put_char(1,114,'O'); 
+C51 COMPILER V9.55   PONGPONG                                                              04/24/2018 17:32:03 PAGE 5   
 
- 242   1                      ball_y = start_y;
- 243   1                      TR0 = 0;
- 244   1                      get_switches();
- 245   1                      TMR3CN = 0x04;  //Turn on the refresh rate timer        
- 246   1      }
- 247          
- 248          
- 249          
- 250          //==============================================================================
- 251          //GET_SWITCHES
- 252          //gets the input of the switches and passes them to the paddle function
- 253          //==============================================================================
- 254          void get_switches(){
- 255   1                              int check = 0;
- 256   1                              switches = ~P3;
- 257   1                              switches &= 0x03;
- 258   1                              paddle1 = switches;
- 259   1                              draw_paddle (0, paddle1top, paddle1); 
- 260   1                              paddle1height = paddle_height;
- 261   1                      
- 262   1                              switches = ~P3;
- 263   1                              switches &= 0x0c;
- 264   1                              paddle2 = switches >> 2;                
- 265   1                              draw_paddle (126, paddle2top, paddle2);
- 266   1                              paddle2height = paddle_height;
- 267   1      
- 268   1                              switches = P3;                  
- 269   1                              switches &= 0xc0;       
- 270   1                              switches = switches >> 6;                       
- 271   1                              check = switches;               
- 272   1                              speed(switches);
- 273   1                              
- 274   1      
- 275   1                              soccer = ~P3;
- 276   1                              soccer &= 0x10; 
- 277   1                              soccer = soccer >> 4;
- 278   1                      //      refresh_screen();
- 279   1      }
- 280          
- 281          
- 282          
- 283          //==============================================================================
- 284          //SOUND
- 285          //produces a noise based on where the ball hits
- 286          //==============================================================================
- 287          void sound(int sound){
- 288   1      
- 289   1              if(sound == 1) {
- 290   2                      RCAP2H = (-307)>>8; RCAP2L = -307; TR2 = 1; duration = 60;
- 291   2              }
- 292   1              
- 293   1              if(sound == 2) {
- 294   2                      RCAP2H = (-230)>>8; RCAP2L = -230; TR2 = 1; duration = 80;
- 295   2              }
- 296   1      
- 297   1              if(sound ==3) {         
- 298   2                      RCAP2H = (-460)>>8; RCAP2L = -460; TR2 = 1; duration = 40;
- 299   2              }
- 300   1      }
- 301          
- 302          
- 303          
-C51 COMPILER V9.55   PONGPONG                                                              04/24/2018 14:02:10 PAGE 6   
+ 242   1      
+ 243   1                      put_char(3,52, 'P'); put_char(3,58, 'L'); put_char(3,64, 'A'); put_char(3,70, 'Y'); //PLAY!
+ 244   1                      put_char(3,76,'!');     put_char(6,30,' ');     put_char(6,36,' '); put_char(6,42,' ');
+ 245   1      
+ 246   1                      refresh_screen();
+ 247   1                      while(BTN1) {
+ 248   2      
+ 249   2                      }
+ 250   1                      blank_screen();
+ 251   1      
+ 252   1      
+ 253   1                      TR0 = 0;
+ 254   1                      get_switches();
+ 255   1                      TMR3CN = 0x04;  //Turn on the refresh rate timer        
+ 256   1      }
+ 257          
+ 258          
+ 259          
+ 260          //==============================================================================
+ 261          //GET_SWITCHES
+ 262          //gets the input of the switches and passes them to the paddle function
+ 263          //==============================================================================
+ 264          void get_switches(){
+ 265   1                              int check = 0;
+ 266   1                              switches = ~P3;
+ 267   1                              switches &= 0x03;
+ 268   1                              paddle1 = switches;
+ 269   1                              draw_paddle (0, paddle1top, paddle1); 
+ 270   1                              paddle1height = paddle_height;
+ 271   1                      
+ 272   1                              switches = ~P3;
+ 273   1                              switches &= 0x0c;
+ 274   1                              paddle2 = switches >> 2;                
+ 275   1                              draw_paddle (126, paddle2top, paddle2);
+ 276   1                              paddle2height = paddle_height;
+ 277   1      
+ 278   1                              switches = P3;                  
+ 279   1                              switches &= 0xc0;       
+ 280   1                              switches = switches >> 6;                       
+ 281   1                              check = switches;               
+ 282   1                              speed(switches);                
+ 283   1      
+ 284   1                              soccer = ~P3;
+ 285   1                              soccer &= 0x10; 
+ 286   1                              soccer = soccer >> 4;
+ 287   1      
+ 288   1      }
+ 289          
+ 290          
+ 291          
+ 292          //==============================================================================
+ 293          //SOUND
+ 294          //produces a noise based on where the ball hits
+ 295          //==============================================================================
+ 296          void sound(int sound){
+ 297   1      
+ 298   1              if(sound == 1) {
+ 299   2                      RCAP2H = (-307)>>8; RCAP2L = -307; TR2 = 1; duration = 60;
+ 300   2              }
+ 301   1              
+ 302   1              if(sound == 2) {
+ 303   2                      RCAP2H = (-230)>>8; RCAP2L = -230; TR2 = 1; duration = 80;
+C51 COMPILER V9.55   PONGPONG                                                              04/24/2018 17:32:03 PAGE 6   
 
- 304          //==============================================================================
- 305          //MOVE_COMPS
- 306          //gets input from the pots and moves the ball
- 307          //==============================================================================
- 308          void move_comps(void) {
- 309   1      
- 310   1              //BALL COORDINATES
- 311   1              char bally, ballx;
- 312   1              //LEFT 4 PADDLE HIT SPOTS
- 313   1              char left_hit1 = (paddle1height/4)+paddle1top;
- 314   1              char left_hit2 = (paddle1height/4*2)+paddle1top;
- 315   1              char left_hit3 = (paddle1height/4*3)+paddle1top;
- 316   1              char left_hit4 = paddle1height+paddle1top;
- 317   1              //RIGHT 4 PADDLE HIT SPOTS
- 318   1              char right_hit1 = (paddle2height/4)+paddle2top;
- 319   1              char right_hit2 = (paddle2height/4*2)+paddle2top;
- 320   1              char right_hit3 = (paddle2height/4*3)+paddle2top;
- 321   1              char right_hit4 = paddle2height+paddle2top;
- 322   1      
- 323   1              //-------------------
- 324   1              //GET POT INPUT
- 325   1              //-------------------
- 326   1              AMX0SL = 0x00;  //Select ain0
- 327   1              onemillidelay(4);
- 328   1              ADC0CF = 0x40;
- 329   1              AD0INT = 0;     //clear flag
- 330   1              AD0BUSY = 1;                    
- 331   1              while(AD0INT == 0){}    
- 332   1              paddle1top = ADC0H*4; //so we get value out of 64       
- 333   1                                                                      
- 334   1              AMX0SL = 0x01; //select ain1    
- 335   1              onemillidelay(4);
- 336   1              ADC0CF = 0x40;
- 337   1              AD0INT = 0;    //clear flag
- 338   1              AD0BUSY = 1; 
- 339   1              while(AD0INT == 0) 
- 340   1              {}
- 341   1              paddle2top = ADC0H*4;//so we get value out of 64        
- 342   1              
- 343   1      
- 344   1                      //---------------------
- 345   1                      //MOVE THE BALL
- 346   1                      //---------------------
- 347   1      
- 348   1                      ballx = ball_x+2; //ballx and bally are the center of the ball
- 349   1                      bally = ball_y+2;
- 350   1      
- 351   1                      //----------------------------------      
- 352   1                      //HITTING TOP OR BOTTOM
- 353   1                      //----------------------------------
- 354   1                      if (bally < 2 || bally > 61) {
- 355   2                      dy = -dy; 
- 356   2                      sound(1); //INVERT TO MOVE OPPOSITE
- 357   2                      }  
- 358   1                      else{ 
- 359   2                      dy = dy;
- 360   2                      }       
- 361   1                                                      
- 362   1              //---------------------------------               
- 363   1              //LEFT PADDLE
- 364   1              //---------------------------------
- 365   1              if (ballx < 3){ 
-C51 COMPILER V9.55   PONGPONG                                                              04/24/2018 14:02:10 PAGE 7   
+ 304   2              }
+ 305   1      
+ 306   1              if(sound ==3) {         
+ 307   2                      RCAP2H = (-460)>>8; RCAP2L = -460; TR2 = 1; duration = 40;
+ 308   2              }
+ 309   1      }
+ 310          
+ 311          
+ 312          
+ 313          //==============================================================================
+ 314          //MOVE_COMPS
+ 315          //gets input from the pots and moves the ball
+ 316          //==============================================================================
+ 317          void move_comps(void) {
+ 318   1      
+ 319   1              //BALL COORDINATES
+ 320   1              char bally, ballx;
+ 321   1              //LEFT 4 PADDLE HIT SPOTS
+ 322   1              char left_hit1 = (paddle1height/4)+paddle1top;
+ 323   1              char left_hit2 = (paddle1height/4*2)+paddle1top;
+ 324   1              char left_hit3 = (paddle1height/4*3)+paddle1top;
+ 325   1              char left_hit4 = paddle1height+paddle1top;
+ 326   1              //RIGHT 4 PADDLE HIT SPOTS
+ 327   1              char right_hit1 = (paddle2height/4)+paddle2top;
+ 328   1              char right_hit2 = (paddle2height/4*2)+paddle2top;
+ 329   1              char right_hit3 = (paddle2height/4*3)+paddle2top;
+ 330   1              char right_hit4 = paddle2height+paddle2top;
+ 331   1      
+ 332   1              //-------------------
+ 333   1              //GET POT INPUT
+ 334   1              //-------------------
+ 335   1              AMX0SL = 0x00;  //Select ain0
+ 336   1              onemillidelay(4);
+ 337   1              ADC0CF = 0x40;
+ 338   1              AD0INT = 0;     //clear flag
+ 339   1              AD0BUSY = 1;                    
+ 340   1              while(AD0INT == 0){}    
+ 341   1              paddle1top = ADC0H*4; //so we get value out of 64       
+ 342   1                                                                      
+ 343   1              AMX0SL = 0x01; //select ain1    
+ 344   1              onemillidelay(4);
+ 345   1              ADC0CF = 0x40;
+ 346   1              AD0INT = 0;    //clear flag
+ 347   1              AD0BUSY = 1; 
+ 348   1              while(AD0INT == 0) 
+ 349   1              {}
+ 350   1              paddle2top = ADC0H*4;//so we get value out of 64        
+ 351   1              
+ 352   1      
+ 353   1                      //---------------------
+ 354   1                      //MOVE THE BALL
+ 355   1                      //---------------------
+ 356   1                      ball_x += run;          
+ 357   1                      ball_y += rise; 
+ 358   1                      
+ 359   1                      ballx = ball_x+2; //so we know where the edges of the ball are
+ 360   1                      bally = ball_y+2; //ball_x and ball_y are the center of the ball
+ 361   1      
+ 362   1                      //----------------------------------      
+ 363   1                      //HITTING TOP OR BOTTOM
+ 364   1                      //----------------------------------
+ 365   1                      if (bally < 2 || bally > 61) {
+C51 COMPILER V9.55   PONGPONG                                                              04/24/2018 17:32:03 PAGE 7   
 
- 366   2      
- 367   2                      //-----FULL PADDLE-----
- 368   2                      if (paddle1 == 3){
- 369   3                      dx = -dx; //INVERT DIRECTION AUTOMATICALLY BECAUSE NO MATTER WHERE IT HITS IT WILL BOUNCE BACK
- 370   3                      sound(1); 
- 371   3                      } 
- 372   2                      //-----TOP QUAD-----                                                                    
- 373   2                      else if (bally >= paddle1top && bally <= left_hit1) {
- 374   3                      dy = -2; //STEEP ANGLE UP
- 375   3                      dx = 1; 
- 376   3                      sound(2);
- 377   3                      }
- 378   2                      //-----THIRD QUAD-----
- 379   2                      else if (bally >= left_hit1 && bally <= left_hit2){
- 380   3                      dy = -1; //SHALLOW ANGLE UP
- 381   3                      dx = 2; 
- 382   3                      sound(2);
- 383   3                      }
- 384   2                      //-----SECOND QUAD-----
- 385   2                      else if (bally >= left_hit2 && bally <= left_hit3){
- 386   3                      dy = 1; //SHALLOW ANGLE DOWN
- 387   3                      dx = 2; 
- 388   3                      sound(2);
- 389   3                      }
- 390   2                      //-----FIRST QUAD-----
- 391   2                      else if (bally >= left_hit3 && bally <= left_hit4){
- 392   3                      dy = 2; //STEEP ANGLE DOWN
- 393   3                      dx = 1; 
- 394   3                      sound(2);
- 395   3                      }
- 396   2                      //-----MISS-----
- 397   2                      else {
- 398   3                      score2++; 
- 399   3                      show_score = 0; 
- 400   3                      ball_x = start_x^0x78; 
- 401   3                      ball_y = start_y;
- 402   3                      dx = -2; 
- 403   3                      dy = 1; 
- 404   3                      sound(3);}
- 405   2                      }
- 406   1      
- 407   1              //---------------------------------               
- 408   1              //RIGHT PADDLE
- 409   1              //---------------------------------
- 410   1              if (ballx > 123)
- 411   1              {       
- 412   2                      //-----FULL PADDLE-----
- 413   2                      if (paddle2 == 3){
- 414   3                      dx = -dx; //INVERT DIRECTION AUTOMATICALLY BECAUSE NO MATTER WHERE IT HITS IT WILL BOUNCE BACK
- 415   3                      sound(1);
- 416   3                      }
- 417   2                      //-----TOP QUAD-----
- 418   2                      else if (bally >= paddle2top && bally <= right_hit1){
- 419   3                      dy = -2; //STEEP ANGLE UP
- 420   3                      dx = -1; 
- 421   3                      sound(2);
- 422   3                      }
- 423   2                      //-----THIRD QUAD-----
- 424   2                      else if (bally >= right_hit1 && bally <= right_hit2) {
- 425   3                      dy = -1; //SHALLOW ANGLE UP
- 426   3                      dx = -2; 
- 427   3                      sound(2);
-C51 COMPILER V9.55   PONGPONG                                                              04/24/2018 14:02:10 PAGE 8   
+ 366   2                      rise = -rise; 
+ 367   2                      sound(1); //INVERT TO MOVE OPPOSITE
+ 368   2                      }  
+ 369   1                      else{ 
+ 370   2                      rise = rise;
+ 371   2                      }       
+ 372   1                                                      
+ 373   1              //---------------------------------               
+ 374   1              //LEFT PADDLE
+ 375   1              //---------------------------------
+ 376   1              if (ballx < 3){ 
+ 377   2      
+ 378   2                      //-----FULL PADDLE-----
+ 379   2                      if (paddle1 == 3){
+ 380   3                      run = -run; //INVERT DIRECTION AUTOMATICALLY BECAUSE NO MATTER WHERE IT HITS IT WILL BOUNCE BACK
+ 381   3                      sound(1); 
+ 382   3                      } 
+ 383   2                      //-----TOP QUAD-----                                                                    
+ 384   2                      else if (bally >= paddle1top && bally <= left_hit1) {
+ 385   3                      rise = -2; //STEEP ANGLE UP
+ 386   3                      run = 1; 
+ 387   3                      sound(2);
+ 388   3                      }
+ 389   2                      //-----THIRD QUAD-----
+ 390   2                      else if (bally >= left_hit1 && bally <= left_hit2){
+ 391   3                      rise = -1; //SHALLOW ANGLE UP
+ 392   3                      run = 2; 
+ 393   3                      sound(2);
+ 394   3                      }
+ 395   2                      //-----SECOND QUAD-----
+ 396   2                      else if (bally >= left_hit2 && bally <= left_hit3){
+ 397   3                      rise = 1; //SHALLOW ANGLE DOWN
+ 398   3                      run = 2; 
+ 399   3                      sound(2);
+ 400   3                      }
+ 401   2                      //-----FIRST QUAD-----
+ 402   2                      else if (bally >= left_hit3 && bally <= left_hit4){
+ 403   3                      rise = 2; //STEEP ANGLE DOWN
+ 404   3                      run = 1; 
+ 405   3                      sound(2);
+ 406   3                      }
+ 407   2                      //-----MISS-----
+ 408   2                      else {
+ 409   3                      score2++; 
+ 410   3                      show_score = 0; 
+ 411   3                      ball_x = 110; 
+ 412   3                      ball_y = 30;
+ 413   3                      run = -1; 
+ 414   3                      rise = 1; 
+ 415   3                      P1 = 0x00;
+ 416   3                      LED9 = 0;
+ 417   3                      LED10 = 0;
+ 418   3                      sound(3);
+ 419   3                      onemillidelay(500);
+ 420   3                      P1 = 0xFF;
+ 421   3                      LED9 = 1;
+ 422   3                      LED10 = 1;
+ 423   3                      }//end else
+ 424   2              refresh_screen();
+ 425   2              }//end if 
+ 426   1      
+ 427   1              //---------------------------------               
+C51 COMPILER V9.55   PONGPONG                                                              04/24/2018 17:32:03 PAGE 8   
 
- 428   3                      }
- 429   2                      //-----SECOND QUAD-----
- 430   2                      else if (bally >= right_hit2 && bally <= right_hit3){
- 431   3                      dy = 1; //SHALLOW ANGLE DOWN
- 432   3                      dx = -2; 
- 433   3                      sound(2);
- 434   3                      }
- 435   2                      //-----FULL PADDLE-----
- 436   2                      else if (bally >= right_hit3 && bally <= right_hit4){
- 437   3                      dy = 2; 
- 438   3                      dx = -1;
- 439   3                      sound(2);
- 440   3                      } 
- 441   2                      //-----MISS-----
- 442   2                      else {
- 443   3                      score1++; 
- 444   3                      show_score = 0; 
- 445   3                      ball_x = start_x; 
- 446   3                      ball_y = start_y;
- 447   3                      dx = 2; 
- 448   3                      dy = 1; 
- 449   3                      sound(3);
- 450   3                      }
- 451   2              }
- 452   1      
- 453   1              
- 454   1      }
- 455          
- 456          
- 457          //==============================================================================
- 458          //DISPLAY SCORES
- 459          //
- 460          //==============================================================================
- 461          void display_scores (char score1, char score2) 
- 462          {
- 463   1      
- 464   1                      int font = (score1)*5;
- 465   1                      int font2;
- 466   1                      char i;
- 467   1                              if(score1 >=10){
- 468   2                                      font2 = 1;
- 469   2                              }
- 470   1                              else {
- 471   2                                      font2 = 0;
- 472   2                              }
- 473   1                                      for (i=0; i<5; i++)
- 474   1                                      {
- 475   2                                              screen[304+i] = score5x8[font+i];
- 476   2                                              screen[298+i] = score5x8[font2+i];
- 477   2                                                      //FOR SOCCER MODE
- 478   2                                                      if(soccer==1) {
- 479   3                                                              put_char(1,42,'P');
- 480   3                                                              put_char(1,48,'1');
- 481   3                                                      }
- 482   2                                                      else if(soccer==0){
- 483   3                                                              put_char(1,42, 'U');
- 484   3                                                              put_char(1,48, 'S');
- 485   3                                                              put_char(1,54, 'A');
- 486   3                                                      }
- 487   2                                      }
- 488   1                      font = (score2)*5;
- 489   1                              if(score2 >=10){
-C51 COMPILER V9.55   PONGPONG                                                              04/24/2018 14:02:10 PAGE 9   
+ 428   1              //RIGHT PADDLE
+ 429   1              //---------------------------------
+ 430   1              if (ballx > 123)
+ 431   1              {       
+ 432   2                      //-----FULL PADDLE-----
+ 433   2                      if (paddle2 == 3){
+ 434   3                      run = -run; //INVERT DIRECTION AUTOMATICALLY BECAUSE NO MATTER WHERE IT HITS IT WILL BOUNCE BACK
+ 435   3                      sound(1);
+ 436   3                      }
+ 437   2                      //-----TOP QUAD-----
+ 438   2                      else if (bally >= paddle2top && bally <= right_hit1){
+ 439   3                      rise = -2; //STEEP ANGLE UP
+ 440   3                      run = -1; 
+ 441   3                      sound(2);
+ 442   3                      }
+ 443   2                      //-----THIRD QUAD-----
+ 444   2                      else if (bally >= right_hit1 && bally <= right_hit2) {
+ 445   3                      rise = -1; //SHALLOW ANGLE UP
+ 446   3                      run = -2; 
+ 447   3                      sound(2);
+ 448   3                      }
+ 449   2                      //-----SECOND QUAD-----
+ 450   2                      else if (bally >= right_hit2 && bally <= right_hit3){
+ 451   3                      rise = 1; //SHALLOW ANGLE DOWN
+ 452   3                      run = -2; 
+ 453   3                      sound(2);
+ 454   3                      }
+ 455   2                      //-----FULL PADDLE-----
+ 456   2                      else if (bally >= right_hit3 && bally <= right_hit4){
+ 457   3                      rise = 2; 
+ 458   3                      run = -1;
+ 459   3                      sound(2);
+ 460   3                      } 
+ 461   2                      //-----MISS-----
+ 462   2                      else {
+ 463   3                      score1++; 
+ 464   3                      show_score = 0; 
+ 465   3                      ball_x = 8; 
+ 466   3                      ball_y = 30;
+ 467   3                      run = 1; 
+ 468   3                      rise = 1; 
+ 469   3                      P1 = 0x00;
+ 470   3                      LED9 = 0;
+ 471   3                      LED10 = 0;
+ 472   3                      sound(3);
+ 473   3                      onemillidelay(500);
+ 474   3                      P1 = 0xFF;
+ 475   3                      LED9 = 1;
+ 476   3                      LED10 = 1;
+ 477   3                      }
+ 478   2              }
+ 479   1      
+ 480   1              
+ 481   1      }
+ 482          
+ 483          
+ 484          //==============================================================================
+ 485          //DISPLAY SCORES
+ 486          //
+ 487          //==============================================================================
+ 488          void display_scores (char score1, char score2) 
+ 489          {
+C51 COMPILER V9.55   PONGPONG                                                              04/24/2018 17:32:03 PAGE 9   
 
- 490   2                                      font2 = 1;
- 491   2                              }
- 492   1                              else {
- 493   2                                      font2 = 0;
- 494   2                              }
- 495   1                                      for (i=0; i<5; i++)
- 496   1                                      {
- 497   2                                              screen[336+i] = score5x8[font+i];
- 498   2                                              screen[330+i] = score5x8[font2+i];
- 499   2                                                      //FOR SOCCER MODE
- 500   2                                                      if(soccer==1) {
- 501   3                                                              put_char(1,74,'P');
- 502   3                                                              put_char(1,80,'2');
- 503   3                                                      }
- 504   2                                                      else if(soccer==0){
- 505   3                                                              put_char(1,70, 'I');
- 506   3                                                              put_char(1,76, 'T');
- 507   3                                                              put_char(1,82, 'A');
- 508   3                                                              put_char(1,88, 'L');
- 509   3                                                              put_char(1,94, 'Y');
- 510   3                                                      }
- 511   2      
- 512   2                                      }//end for
- 513   1                      refresh_screen();               
- 514   1      }
- 515          
- 516          
- 517          
- 518          
- 519          //==============================================================================
- 520          //WINNER
- 521          //
- 522          //==============================================================================
- 523          void winner(void) {
- 524   1                              blank_screen();
- 525   1                              init_game();
- 526   1                              display_scores(score1, score2);
- 527   1                              put_char(1,48, 'W'); put_char(1,54, 'I'); put_char(1,60,'N');   put_char(1,66,'N'); //displays WINNER
- 528   1                              put_char(1,72,'E'); put_char(1,78,'R');
- 529   1                              refresh_screen();
- 530   1                              onemillidelay(2000);
- 531   1      
- 532   1      }
- 533          
- 534          
- 535          
- 536          //==============================================================================
- 537          //SOCCERMODE
- 538          //
- 539          //==============================================================================
- 540          void soccermode(void) {
- 541   1              int i; 
- 542   1      
- 543   1              for(i=63; i<960; i++) {
- 544   2                      screen[i+1] = 0xFF; 
- 545   2                      i= i+127;
- 546   2              }
- 547   1      
- 548   1              //LEFT GOAL
- 549   1              for(i=256; i<276; i++) {
- 550   2                      screen[i] = 0x1;
- 551   2              }
-C51 COMPILER V9.55   PONGPONG                                                              04/24/2018 14:02:10 PAGE 10  
+ 490   1      
+ 491   1                      int font = (score1)*5;
+ 492   1                      int font2;
+ 493   1                      char i;
+ 494   1                              if(score1 >=10){
+ 495   2                                      font2 = 5;
+ 496   2                                      font = (((font/5)-10)*5);
+ 497   2                              }
+ 498   1                              else {
+ 499   2                                      font2 = 0;
+ 500   2                              }
+ 501   1      
+ 502   1      
+ 503   1                                      for (i=0; i<5; i++)
+ 504   1                                      {
+ 505   2                                              screen[304+i] = score5x8[font+i];
+ 506   2                                              screen[298+i] = score5x8[font2+i];
+ 507   2                                                      //FOR SOCCER MODE
+ 508   2                                                      if(soccer==1) {
+ 509   3                                                              put_char(1,42,'P');
+ 510   3                                                              put_char(1,48,'1');
+ 511   3                                                      }
+ 512   2                                                      else if(soccer==0){
+ 513   3                                                              put_char(1,42, 'U');
+ 514   3                                                              put_char(1,48, 'S');
+ 515   3                                                              put_char(1,54, 'A');
+ 516   3                                                      }
+ 517   2                                      }
+ 518   1                      font = (score2)*5;
+ 519   1                              if(score2 >=10){
+ 520   2                                      font2 = 5;
+ 521   2                                      font = (((font/5)-10)*5);
+ 522   2                              }
+ 523   1                              else {
+ 524   2                                      font2 = 0;
+ 525   2                              }
+ 526   1                                      for (i=0; i<5; i++)
+ 527   1                                      {
+ 528   2                                              screen[336+i] = score5x8[font+i];
+ 529   2                                              screen[330+i] = score5x8[font2+i];
+ 530   2                                                      //FOR SOCCER MODE
+ 531   2                                                      if(soccer==1) {
+ 532   3                                                              put_char(1,74,'P');
+ 533   3                                                              put_char(1,80,'2');
+ 534   3                                                      }
+ 535   2                                                      else if(soccer==0){
+ 536   3                                                              put_char(1,70, 'I');
+ 537   3                                                              put_char(1,76, 'T');
+ 538   3                                                              put_char(1,82, 'A');
+ 539   3                                                              put_char(1,88, 'L');
+ 540   3                                                              put_char(1,94, 'Y');
+ 541   3                                                      }
+ 542   2      
+ 543   2                                      }//end for
+ 544   1                      refresh_screen();               
+ 545   1      }
+ 546          
+ 547          
+ 548          
+ 549          
+ 550          //==============================================================================
+ 551          //WINNER
+C51 COMPILER V9.55   PONGPONG                                                              04/24/2018 17:32:03 PAGE 10  
 
- 552   1              for(i=768; i<788; i++) {
- 553   2                      screen[i] = 0x1;
- 554   2              }
- 555   1              for(i=275; i<768; i++) {
- 556   2                      screen[i] = 0xFF;
- 557   2                      i = i+127;
- 558   2              }
- 559   1      
- 560   1              //RIGHT GOAL
- 561   1              for(i=363; i<383; i++) {
- 562   2                      screen[i] = 0x1;
- 563   2              }
- 564   1              for(i=875; i<895; i++) {
- 565   2                      screen[i] = 0x1;
- 566   2              }
- 567   1              for(i=363; i<875; i++) {
- 568   2                      screen[i] = 0xFF;
- 569   2                      i = i+127;
- 570   2              }
- 571   1      
- 572   1              //CENTER 
- 573   1              for(i=449;i<459;i++){
- 574   2              screen[i] = 0x01;
- 575   2              screen[i+256] = 0x01;
- 576   2              }
- 577   1              for(i=438;i<448;i++){
- 578   2              screen[i] = 0x01;
- 579   2              screen[i+256] = 0x01;
- 580   2              }
- 581   1              for(i=438;i<689;i++){
- 582   2              screen[i] = 0xFF;
- 583   2              screen[i+20] = 0xFF;
- 584   2              i=i+127;
- 585   2              }
- 586   1      
- 587   1      }
- 588          
- 589          
- 590          
- 591          
- 592          
- 593          
- 594          
- 595          
- 596          
- 597          
- 598          
- 599          
- 600          //==============================================================================
- 601          //SPEED
- 602          //gets input from the pots and moves the ball
- 603          //==============================================================================
- 604          void speed(char speed)
- 605          {
- 606   1                      if(speed==0) {
- 607   2                              TMR3RLH = (-18432)>>8; //100 pixels per second
- 608   2                              TMR3RLL = -18432;
- 609   2                      }
- 610   1                      else if(speed==1) {
- 611   2                              TMR3RLH = (-15360)>>8;//120 pixels per second
- 612   2                              TMR3RLL = -15360;
- 613   2                      }
-C51 COMPILER V9.55   PONGPONG                                                              04/24/2018 14:02:10 PAGE 11  
+ 552          //
+ 553          //==============================================================================
+ 554          void winner(void) {
+ 555   1                              int i;
+ 556   1                              blank_screen();
+ 557   1                              init_game();
+ 558   1                              display_scores(score1, score2);
+ 559   1                              put_char(4,48, 'W'); put_char(4,54, 'I'); put_char(4,60,'N');   put_char(4,66,'N'); //displays WINNER
+ 560   1                              put_char(4,72,'E'); put_char(4,78,'R'); put_char(4,84, '!');
+ 561   1                              refresh_screen();
+ 562   1                              
+ 563   1      
+ 564   1                              for(i=0;i<5;i++) {
+ 565   2      
+ 566   2                                      P1 = 0x00;
+ 567   2                                      LED9 = 0;
+ 568   2                                      LED10 = 0;
+ 569   2                                      sound(3);
+ 570   2                                      onemillidelay(500);
+ 571   2                                      P1 = 0xFF;
+ 572   2                                      LED9 = 1;
+ 573   2                                      LED10 = 1;
+ 574   2      
+ 575   2                              }
+ 576   1                              onemillidelay(2000);
+ 577   1      }
+ 578          
+ 579          
+ 580          
+ 581          //==============================================================================
+ 582          //SOCCERMODE
+ 583          //
+ 584          //==============================================================================
+ 585          void soccermode(void) {
+ 586   1              int i; 
+ 587   1      
+ 588   1              for(i=63; i<960; i++) {
+ 589   2                      screen[i+1] = 0xFF; 
+ 590   2                      i= i+127;
+ 591   2              }
+ 592   1      
+ 593   1              //LEFT GOAL
+ 594   1              for(i=256; i<276; i++) {
+ 595   2                      screen[i] = 0x1;
+ 596   2              }
+ 597   1              for(i=768; i<788; i++) {
+ 598   2                      screen[i] = 0x1;
+ 599   2              }
+ 600   1              for(i=275; i<768; i++) {
+ 601   2                      screen[i] = 0xFF;
+ 602   2                      i = i+127;
+ 603   2              }
+ 604   1      
+ 605   1              //RIGHT GOAL
+ 606   1              for(i=363; i<383; i++) {
+ 607   2                      screen[i] = 0x1;
+ 608   2              }
+ 609   1              for(i=875; i<895; i++) {
+ 610   2                      screen[i] = 0x1;
+ 611   2              }
+ 612   1              for(i=363; i<875; i++) {
+ 613   2                      screen[i] = 0xFF;
+C51 COMPILER V9.55   PONGPONG                                                              04/24/2018 17:32:03 PAGE 11  
 
- 614   1                      else if(speed==2) {
- 615   2                              TMR3RLH = (-12288)>>8;//150 pixels per second
- 616   2                              TMR3RLL = -12288;
- 617   2                      }
- 618   1                      else if(speed==3) {
- 619   2                              TMR3RLH = (-9216)>>8;//200 pixels per second
- 620   2                              TMR3RLL = -9216;
- 621   2                      }
- 622   1              
- 623   1      }
- 624          
- 625          
- 626          
- 627          
- 628          void draw_paddle (int x, int y, char pad_type)
- 629          {
- 630   1              long mask;
- 631   1                      switch(pad_type)
- 632   1                      {
- 633   2                              case 0:
- 634   2                                      if(y>54) y = 54;        //Case 0 sets the paddle
- 635   2                                      mask = 0xffl;           //as 8 pixels tall and 
- 636   2                                      paddle_height = 8;      //assigns it as a long
- 637   2                                      break;
- 638   2                              case 1:
- 639   2                                      if(y>50) y = 50;        //Case 1 sets the paddle
- 640   2                                      mask = 0xfffl;          //as 12 pixels tall and
- 641   2                                      paddle_height = 12;     //assigns it as a long
- 642   2                                      break;
- 643   2                              case 2:
- 644   2                                      if(y > 46) y= 46;       //Case 2 sets the paddle
- 645   2                                      mask = 0xffffl;         //as 16 pisels tall and 
- 646   2                                      paddle_height = 16;     //assigns it as a long
- 647   2                                      break;
- 648   2                              case 3:
- 649   2                                      while(x<1024)                   //Case 3 is where the
- 650   2                                      {                                               //the paddle can be 
- 651   3                                              screen[x] = 0xffl;      //set as 64 pixels tall
- 652   3                                          screen[x+1] = 0xffl;//which creates the one
- 653   3                                              x = x+128;                      //player mode.
- 654   3                                              paddle_top = 2;
- 655   3                                              paddle_bottom = 60;
- 656   3                                              paddle_height = 60;
- 657   3                                      }
- 658   2                                      return;
- 659   2                      }
- 660   1              if (y<2) y =2;                                  //In this section of the
- 661   1              mask = mask <<(y%8);                    //draw_paddle we apply the 
- 662   1              x += (y/8)*128;                                 //mask from the top of the screen
- 663   1              screen[x] |= mask;                              //to the bottom of the screen
- 664   1              screen[x+1] |= mask;                    //y modulus 8 is how the correct
- 665   1              screen[x+128] |= mask >> 8;             //page is selected and than we span
- 666   1              screen[x+129] |= mask >> 8;             //at least 3 pages so as to cover 
- 667   1              screen[x+256] |= mask >> 16;    //all the paddle sizes with the exception
- 668   1              screen[x+257] |= mask >> 16;    //of the full length paddle
- 669   1              paddle_top = y;
- 670   1              paddle_bottom = y+paddle_height-1;
- 671   1      }
+ 614   2                      i = i+127;
+ 615   2              }
+ 616   1      
+ 617   1              //CENTER 
+ 618   1              for(i=449;i<459;i++){
+ 619   2              screen[i] = 0x01;
+ 620   2              screen[i+256] = 0x01;
+ 621   2              }
+ 622   1              for(i=438;i<448;i++){
+ 623   2              screen[i] = 0x01;
+ 624   2              screen[i+256] = 0x01;
+ 625   2              }
+ 626   1              for(i=438;i<689;i++){
+ 627   2              screen[i] = 0xFF;
+ 628   2              screen[i+20] = 0xFF;
+ 629   2              i=i+127;
+ 630   2              }
+ 631   1      
+ 632   1      }
+ 633          
+ 634          
+ 635          
+ 636          
+ 637          
+ 638          
+ 639          
+ 640          
+ 641          
+ 642          
+ 643          
+ 644          
+ 645          //==============================================================================
+ 646          //SPEED
+ 647          //gets input from the pots and moves the ball
+ 648          //==============================================================================
+ 649          void speed(char speed)
+ 650          {
+ 651   1                      if(speed==0) {
+ 652   2                              TMR3RLH = (-18432)>>8; //100 pixels per second
+ 653   2                              TMR3RLL = -18432;
+ 654   2                      }
+ 655   1                      else if(speed==1) {
+ 656   2                              TMR3RLH = (-50000)>>8;//120 pixels per second
+ 657   2                              TMR3RLL = -50000;
+ 658   2                      }
+ 659   1                      else if(speed==2) {
+ 660   2                              TMR3RLH = (-12288)>>8;//150 pixels per second
+ 661   2                              TMR3RLL = -12288;
+ 662   2                      }
+ 663   1                      else if(speed==3) {
+ 664   2                              TMR3RLH = (-9216)>>8;//200 pixels per second
+ 665   2                              TMR3RLL = -9216;
+ 666   2                      }
+ 667   1              
+ 668   1      }
+ 669          
+ 670          
+ 671          
  672          
- 673          
- 674          void draw_ball (int x, int y)
- 675          {
-C51 COMPILER V9.55   PONGPONG                                                              04/24/2018 14:02:10 PAGE 12  
+ 673          void draw_paddle (int x, int y, char paddle)
+ 674          {
+ 675   1              long mask;
+C51 COMPILER V9.55   PONGPONG                                                              04/24/2018 17:32:03 PAGE 12  
 
- 676   1              long mask = 0x1fl << (y%8); // 1f gives a 5 pixel tall mask
- 677   1                                                                  // it is cast as a long and than
- 678   1                                                                      // shifted left by the remainder of
- 679   1                                                                      // y divided by 8 so as to get the
- 680   1                                                                      // mask in the right place vertically
- 681   1              int j = (y/8)*128+x;      // divide by 8 and multiply by 128 and add
- 682   1                                                                // the x value to get on the correct page
- 683   1              int i;
- 684   1              for (i = 0; i<5; ++i) // loop 5 times to make it 5 pixels wide
- 685   1              { 
- 686   2                      screen[j] |= mask; // or with the mask to not overwrite anything 
- 687   2                      screen[j+128] |= mask >>8;//shift right span two pages.
- 688   2                      j++; 
- 689   2              }
- 690   1      }
- 691          
- 692          
- 693          
+ 676   1      
+ 677   1                              if(paddle == 0) {
+ 678   2                                      if(y>54) y = 54;        //Case 0 sets the paddle
+ 679   2                                      mask = 0xffl;           //as 8 pixels tall and 
+ 680   2                                      paddle_height = 8;      //assigns it as a long
+ 681   2                              }
+ 682   1                              else if(paddle == 1) {
+ 683   2                                      if(y>50) y = 50;        //Case 1 sets the paddle
+ 684   2                                      mask = 0xfffl;          //as 12 pixels tall and
+ 685   2                                      paddle_height = 12;     //assigns it as a long
+ 686   2                              }
+ 687   1                              else if(paddle == 2) {
+ 688   2                                      if(y > 46) y= 46;       //Case 2 sets the paddle
+ 689   2                                      mask = 0xffffl;         //as 16 pisels tall and 
+ 690   2                                      paddle_height = 16;     //assigns it as a long
+ 691   2                              }
+ 692   1                              else if(paddle == 3) {
+ 693   2                                      while(x<1024)                   //Case 3 is where the
+ 694   2                                      {                                               //the paddle can be 
+ 695   3                                              screen[x] = 0xffl;      //set as 64 pixels tall
+ 696   3                                          screen[x+1] = 0xffl;//which creates the one
+ 697   3                                              x = x+128;                      //player mode.
+ 698   3                                              paddle_top = 2;
+ 699   3                                              paddle_bottom = 60;
+ 700   3                                              paddle_height = 60;
+ 701   3                                      }
+ 702   2                              }
+ 703   1                      
+ 704   1              if (y<2) y =2;                                  //In this section of the
+ 705   1              mask = mask <<(y%8);                    //draw_paddle we apply the 
+ 706   1              x += (y/8)*128;                                 //mask from the top of the screen
+ 707   1              screen[x] |= mask;                              //to the bottom of the screen
+ 708   1              screen[x+1] |= mask;                    //y modulus 8 is how the correct
+ 709   1              screen[x+128] |= mask >> 8;             //page is selected and than we span
+ 710   1              screen[x+129] |= mask >> 8;             //at least 3 pages so as to cover 
+ 711   1              screen[x+256] |= mask >> 16;    //all the paddle sizes with the exception
+ 712   1              screen[x+257] |= mask >> 16;    //of the full length paddle
+ 713   1              paddle_top = y;
+ 714   1              paddle_bottom = y+paddle_height-1;
+ 715   1      }
+ 716          
+ 717          
+ 718          void draw_ball (int x, int y)
+ 719          {
+ 720   1              long mask = 0x1fl << (y%8); // 1f gives a 5 pixel tall mask
+ 721   1                                                                  // it is cast as a long and than
+ 722   1                                                                      // shifted left by the remainder of
+ 723   1                                                                      // y divided by 8 so as to get the
+ 724   1                                                                      // mask in the right place vertically
+ 725   1              int j = (y/8)*128+x;      // divide by 8 and multiply by 128 and add
+ 726   1                                                                // the x value to get on the correct page
+ 727   1              int i;
+ 728   1              for (i = 0; i<5; ++i) // loop 5 times to make it 5 pixels wide
+ 729   1              { 
+ 730   2                      screen[j] |= mask; // or with the mask to not overwrite anything 
+ 731   2                      screen[j+128] |= mask >>8;//shift right span two pages.
+ 732   2                      j++; 
+ 733   2              }
+ 734   1      }
+ 735          
+ 736          
+ 737          
+C51 COMPILER V9.55   PONGPONG                                                              04/24/2018 17:32:03 PAGE 13  
+
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =   3075    ----
+   CODE SIZE        =   3216    ----
    CONSTANT SIZE    =     16    ----
    XDATA SIZE       =   ----    ----
    PDATA SIZE       =   ----    ----
-   DATA SIZE        =     56      38
+   DATA SIZE        =     51      42
    IDATA SIZE       =   ----    ----
    BIT SIZE         =   ----    ----
 END OF MODULE INFORMATION.

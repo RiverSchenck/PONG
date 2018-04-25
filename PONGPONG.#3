@@ -1,7 +1,15 @@
 #include <C8051F020.h>
+#include <stdlib.h>
 #include <lcd.h>
 #include <pongheader.h>
 
+
+
+sbit BTN1 = P2^2;			//BTN1 FOR START GAME
+sbit BTN2 = P2^3;
+unsigned char LED18;
+sbit LED9 = P2^4;
+sbit LED10 = P2^5;
 
 
 void main(void)
@@ -44,56 +52,50 @@ void main(void)
 		get_switches();
 		init_game();
 		display_scores(score1, score2);
-		ball_x = start_x;
-		ball_y = start_y;
 
 //----------------------	
 //Playing game
 //----------------------
-for(;;) {
+	while(BTN2 == 1) {
 
-	//SHOW SCORE LOOP. IE AFTER A POINT IS SCORED
-	while(show_score == 0)
-		{
-			display_scores(score1, score2);
-			onemillidelay(2000);//DELAY TO SHOW THE SCORE OF THE GAME
-			get_switches();
-			draw_ball(ball_x, ball_y);
-			show_score = 1;
-		}
-		//PLAYING GAME LOOP
-		while(show_score == 1)
-		{
-			if(TMR3CN == 0x84)//If the overflow flag is raised
-			{
-				//CHECKS TO SEE IF SOMEONE HAS WON
-				if(score1 < 11 && score2 < 11) {
 
-				blank_screen();		//The screen is blanked and
-				ball_x += dx;			//the ball is moved the distance
-				ball_y += dy;			//and direction that is being
-				init_game();			//in the move_ball function
-				get_switches(); 
-				move_comps();
+		//SHOW SCORE LOOP. IE AFTER A POINT IS SCORED
+		while(show_score == 0) {
+				display_scores(score1, score2);
+				onemillidelay(2000);//DELAY TO SHOW THE SCORE OF THE GAME
+				get_switches();
 				draw_ball(ball_x, ball_y);
-				refresh_screen();	
-				TMR3CN &= 0x7F;				
-				}		 
-				else if(score1 == 11 || score2 == 11)
+				show_score = 1;
+			}
+			//PLAYING GAME LOOP
+			while(show_score == 1 && BTN2 == 1)
+			{
+				if(TMR3CN == 0x84)//If the overflow flag is raised
 				{
-					winner();
-					return;
-				}//end else if
+					//CHECKS TO SEE IF SOMEONE HAS WON
+					if(score1 < 11 && score2 < 11) {
 
-			}//end if
+					blank_screen();				
+					init_game();			
+					get_switches(); 
+					move_comps();
+					draw_ball(ball_x, ball_y);
+					refresh_screen();	
+					TMR3CN &= 0x7F;	
+					}									 
+					else if(score1 == 11 || score2 == 11)
+					{
+						winner();
+						return;
+					}//end else if
 
-		}//end while
+				}//end if
+	
+			}//end while
 	
 	}//end for
 
 }//end main
-
-
 
 
 
@@ -105,19 +107,27 @@ for(;;) {
 
 void timer_0(void) interrupt 1
 {
-	start_x ^= 0x78;
+	if(count < 3)
+	{	
+		rise = random[count];
+		ball_x = serve[count];
+		count++;			
+	}
+	else if(count == 3)
+	{
+		rise = random[count];
+		count = 0;			
+	}
 
-	dx = -dx;
-	if(random_count < sizeof(dy_random)-1)//If less than 10 enter loop
-	{
-		dy = dy_random[random_count];//set change in y to random value
-		random_count++;				 //and increment the count
+
+	if(ball_x ==110) {
+		run = -1;
 	}
-	else if(random_count == sizeof(dy_random)-1)//If equal to 10 enter loop
-	{
-		dy = dy_random[random_count];//set change in y to random value
-		random_count = 0;			 //and reset the count to 0
+	else{
+		run = 1;
 	}
+	ball_y = 30;
+
 }
 
 
@@ -239,8 +249,7 @@ void init_text(void) {
 		}
 		blank_screen();
 
-		ball_x = start_x;
-		ball_y = start_y;
+
 		TR0 = 0;
 		get_switches();
 		TMR3CN = 0x04;	//Turn on the refresh rate timer	
@@ -270,13 +279,12 @@ void get_switches(){
 			switches &= 0xc0;	
 			switches = switches >> 6;			
 			check = switches;		
-			speed(switches);
-			
+			speed(switches);		
 
 			soccer = ~P3;
 			soccer &= 0x10; 
 			soccer = soccer >> 4;
-		//	refresh_screen();
+
 }
 
 
@@ -345,19 +353,21 @@ void move_comps(void) {
 		//---------------------
 		//MOVE THE BALL
 		//---------------------
-
-		ballx = ball_x+2; //ballx and bally are the center of the ball
-		bally = ball_y+2;
+		ball_x += run;		
+		ball_y += rise;	
+		
+		ballx = ball_x+2; //so we know where the edges of the ball are
+		bally = ball_y+2; //ball_x and ball_y are the center of the ball
 
 		//----------------------------------	  
 		//HITTING TOP OR BOTTOM
 		//----------------------------------
 		if (bally < 2 || bally > 61) {
-		dy = -dy; 
+		rise = -rise; 
 		sound(1); //INVERT TO MOVE OPPOSITE
 		}  
 		else{ 
-		dy = dy;
+		rise = rise;
 		}	
 						
 	//---------------------------------		  
@@ -367,43 +377,52 @@ void move_comps(void) {
 
 		//-----FULL PADDLE-----
 		if (paddle1 == 3){
-		dx = -dx; //INVERT DIRECTION AUTOMATICALLY BECAUSE NO MATTER WHERE IT HITS IT WILL BOUNCE BACK
+		run = -run; //INVERT DIRECTION AUTOMATICALLY BECAUSE NO MATTER WHERE IT HITS IT WILL BOUNCE BACK
 		sound(1); 
 		} 
 		//-----TOP QUAD-----									
 		else if (bally >= paddle1top && bally <= left_hit1) {
-		dy = -2; //STEEP ANGLE UP
-		dx = 1; 
+		rise = -2; //STEEP ANGLE UP
+		run = 1; 
 		sound(2);
 		}
 		//-----THIRD QUAD-----
 		else if (bally >= left_hit1 && bally <= left_hit2){
-		dy = -1; //SHALLOW ANGLE UP
-		dx = 2; 
+		rise = -1; //SHALLOW ANGLE UP
+		run = 2; 
 		sound(2);
 		}
 		//-----SECOND QUAD-----
 		else if (bally >= left_hit2 && bally <= left_hit3){
-		dy = 1; //SHALLOW ANGLE DOWN
-		dx = 2; 
+		rise = 1; //SHALLOW ANGLE DOWN
+		run = 2; 
 		sound(2);
 		}
 		//-----FIRST QUAD-----
 		else if (bally >= left_hit3 && bally <= left_hit4){
-		dy = 2; //STEEP ANGLE DOWN
-		dx = 1; 
+		rise = 2; //STEEP ANGLE DOWN
+		run = 1; 
 		sound(2);
 		}
 		//-----MISS-----
 		else {
 		score2++; 
 		show_score = 0; 
-		ball_x = start_x^0x78; 
-		ball_y = start_y;
-		dx = -2; 
-		dy = 1; 
-		sound(3);}
-		}
+		ball_x = 110; 
+		ball_y = 30;
+		run = -1; 
+		rise = 1; 
+		P1 = 0x00;
+		LED9 = 0;
+		LED10 = 0;
+		sound(3);
+		onemillidelay(500);
+		P1 = 0xFF;
+		LED9 = 1;
+		LED10 = 1;
+		}//end else
+	refresh_screen();
+	}//end if 
 
 	//---------------------------------		  
 	//RIGHT PADDLE
@@ -412,42 +431,49 @@ void move_comps(void) {
 	{	
 		//-----FULL PADDLE-----
 		if (paddle2 == 3){
-		dx = -dx; //INVERT DIRECTION AUTOMATICALLY BECAUSE NO MATTER WHERE IT HITS IT WILL BOUNCE BACK
+		run = -run; //INVERT DIRECTION AUTOMATICALLY BECAUSE NO MATTER WHERE IT HITS IT WILL BOUNCE BACK
 		sound(1);
 		}
 		//-----TOP QUAD-----
 		else if (bally >= paddle2top && bally <= right_hit1){
-		dy = -2; //STEEP ANGLE UP
-		dx = -1; 
+		rise = -2; //STEEP ANGLE UP
+		run = -1; 
 		sound(2);
 		}
 		//-----THIRD QUAD-----
 		else if (bally >= right_hit1 && bally <= right_hit2) {
-		dy = -1; //SHALLOW ANGLE UP
-		dx = -2; 
+		rise = -1; //SHALLOW ANGLE UP
+		run = -2; 
 		sound(2);
 		}
 		//-----SECOND QUAD-----
 		else if (bally >= right_hit2 && bally <= right_hit3){
-		dy = 1; //SHALLOW ANGLE DOWN
-		dx = -2; 
+		rise = 1; //SHALLOW ANGLE DOWN
+		run = -2; 
 		sound(2);
 		}
 		//-----FULL PADDLE-----
 		else if (bally >= right_hit3 && bally <= right_hit4){
-		dy = 2; 
-		dx = -1;
+		rise = 2; 
+		run = -1;
 		sound(2);
 		} 
 		//-----MISS-----
 		else {
 		score1++; 
 		show_score = 0; 
-		ball_x = start_x; 
-		ball_y = start_y;
-		dx = 2; 
-		dy = 1; 
+		ball_x = 8; 
+		ball_y = 30;
+		run = 1; 
+		rise = 1; 
+		P1 = 0x00;
+		LED9 = 0;
+		LED10 = 0;
 		sound(3);
+		onemillidelay(500);
+		P1 = 0xFF;
+		LED9 = 1;
+		LED10 = 1;
 		}
 	}
 
@@ -466,11 +492,14 @@ void display_scores (char score1, char score2)
 		int font2;
 		char i;
 			if(score1 >=10){
-				font2 = 1;
+				font2 = 5;
+				font = (((font/5)-10)*5);
 			}
 			else {
 				font2 = 0;
 			}
+
+
 				for (i=0; i<5; i++)
 				{
 					screen[304+i] = score5x8[font+i];
@@ -488,7 +517,8 @@ void display_scores (char score1, char score2)
 				}
 		font = (score2)*5;
 			if(score2 >=10){
-				font2 = 1;
+				font2 = 5;
+				font = (((font/5)-10)*5);
 			}
 			else {
 				font2 = 0;
@@ -522,14 +552,28 @@ void display_scores (char score1, char score2)
 //
 //==============================================================================
 void winner(void) {
+			int i;
 			blank_screen();
 			init_game();
 			display_scores(score1, score2);
-			put_char(1,48, 'W'); put_char(1,54, 'I'); put_char(1,60,'N');	put_char(1,66,'N'); //displays WINNER
-			put_char(1,72,'E'); put_char(1,78,'R');
+			put_char(4,48, 'W'); put_char(4,54, 'I'); put_char(4,60,'N');	put_char(4,66,'N'); //displays WINNER
+			put_char(4,72,'E'); put_char(4,78,'R'); put_char(4,84, '!');
 			refresh_screen();
-			onemillidelay(2000);
+			
 
+			for(i=0;i<5;i++) {
+
+				P1 = 0x00;
+				LED9 = 0;
+				LED10 = 0;
+				sound(3);
+				onemillidelay(500);
+				P1 = 0xFF;
+				LED9 = 1;
+				LED10 = 1;
+
+			}
+			onemillidelay(2000);
 }
 
 
@@ -605,30 +649,18 @@ void soccermode(void) {
 void speed(char speed)
 {
 		if(speed==0) {
-		sound(3);
-		sound(3);
-		sound(3);
 			TMR3RLH = (-18432)>>8; //100 pixels per second
 			TMR3RLL = -18432;
 		}
 		else if(speed==1) {
-				sound(3);
-		sound(3);
-		sound(3);
-			TMR3RLH = (-15360)>>8;//120 pixels per second
-			TMR3RLL = -15360;
+			TMR3RLH = (-30000)>>8;//120 pixels per second
+			TMR3RLL = -30000;
 		}
 		else if(speed==2) {
-				sound(3);
-		sound(3);
-		sound(3);
 			TMR3RLH = (-12288)>>8;//150 pixels per second
 			TMR3RLL = -12288;
 		}
 		else if(speed==3) {
-				sound(3);
-		sound(3);
-		sound(3);
 			TMR3RLH = (-9216)>>8;//200 pixels per second
 			TMR3RLL = -9216;
 		}
@@ -638,27 +670,26 @@ void speed(char speed)
 
 
 
-void draw_paddle (int x, int y, char pad_type)
+void draw_paddle (int x, int y, char paddle)
 {
 	long mask;
-		switch(pad_type)
-		{
-			case 0:
+
+			if(paddle == 0) {
 				if(y>54) y = 54;  	//Case 0 sets the paddle
 				mask = 0xffl;  		//as 8 pixels tall and 
 				paddle_height = 8;	//assigns it as a long
-				break;
-			case 1:
+			}
+			else if(paddle == 1) {
 				if(y>50) y = 50;	//Case 1 sets the paddle
 				mask = 0xfffl;		//as 12 pixels tall and
 				paddle_height = 12;	//assigns it as a long
-				break;
-			case 2:
+			}
+			else if(paddle == 2) {
 				if(y > 46) y= 46;	//Case 2 sets the paddle
 				mask = 0xffffl; 	//as 16 pisels tall and 
 				paddle_height = 16;	//assigns it as a long
-				break;
-			case 3:
+			}
+			else if(paddle == 3) {
 				while(x<1024)			//Case 3 is where the
 				{						//the paddle can be 
 				   	screen[x] = 0xffl;	//set as 64 pixels tall
@@ -668,8 +699,8 @@ void draw_paddle (int x, int y, char pad_type)
 					paddle_bottom = 60;
 					paddle_height = 60;
 				}
-				return;
-		}
+			}
+		
 	if (y<2) y =2;					//In this section of the
 	mask = mask <<(y%8);			//draw_paddle we apply the 
 	x += (y/8)*128;					//mask from the top of the screen
